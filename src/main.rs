@@ -1,4 +1,5 @@
 use clap::Parser;
+use smiley::Preprocessor;
 use std::path::PathBuf;
 
 /// A (yet-another) simple CSS preprocessor
@@ -19,6 +20,19 @@ struct Cli {
 
 fn main() {
     let cli = Cli::parse();
+    let mut preprocessor = Preprocessor::default();
 
-    println!("{:?}", cli);
+    preprocessor.set_src_file(&cli.src);
+
+    if cli.watch {
+        preprocessor.set_to_watch_mode();
+    }
+
+    if let Some(out) = cli.out {
+        preprocessor.set_out_file(&out);
+    } else {
+        preprocessor.set_out_file(&cli.src);
+    }
+
+    preprocessor.run();
 }
