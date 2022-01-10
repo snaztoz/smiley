@@ -24,14 +24,12 @@ fn main() {
 
     preprocessor.set_src_file(&cli.src);
 
-    if cli.watch {
-        preprocessor.set_to_watch_mode();
-    }
-
     if let Some(out) = cli.out {
         preprocessor.set_out_file(&out);
-    } else {
-        preprocessor.set_out_file(&cli.src);
+    }
+
+    if cli.watch {
+        preprocessor.set_to_watch_mode();
     }
 
     preprocessor.run();
