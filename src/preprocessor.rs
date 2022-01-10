@@ -1,3 +1,4 @@
+use crate::util;
 use std::path::{Path, PathBuf};
 
 #[derive(Default)]
@@ -16,6 +17,8 @@ impl Preprocessor {
     }
 
     pub fn set_src_file(&mut self, file: &Path) {
+        util::assert_file_exists(file);
+
         self.src = Some(file.to_path_buf());
     }
 
