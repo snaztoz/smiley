@@ -21,6 +21,7 @@ impl Preprocessor {
 
     pub fn set_src_file(&mut self, file: &Path) {
         util::assert_file_exists(file);
+        util::assert_src_file_extension(file);
 
         self.src = Some(file.to_path_buf());
     }

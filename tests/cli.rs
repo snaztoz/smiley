@@ -35,3 +35,16 @@ fn run_with_non_existing_src_file() {
             filename
         )));
 }
+
+#[test]
+fn run_with_invalid_src_file_extension() {
+    let file = NamedTempFile::new("srcfile.txt").unwrap();
+    file.write_str("").unwrap();
+
+    let mut cmd = Command::cargo_bin("smiley").unwrap();
+
+    cmd.arg(file.path());
+    cmd.assert()
+        .failure()
+        .stderr(predicate::str::contains("invalid extension"));
+}
