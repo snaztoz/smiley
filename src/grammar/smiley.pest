@@ -9,7 +9,7 @@ lines = {
 }
 
 line = {
-    WHITESPACE* ~ "foo"
+    WHITESPACE* ~ (!NEWLINE ~ ANY)+
 }
 
 WHITESPACE = _{ " " | "\t" }
