@@ -1,0 +1,15 @@
+smiley = {
+    SOI ~ lines ~ EOI
+}
+
+lines = {
+    NEWLINE* ~  // skip newlines at the start of file
+    (line ~ (NEWLINE+ ~ line)*)? ~
+    NEWLINE*    // skip newlines at the end of file
+}
+
+line = {
+    WHITESPACE* ~ "foo"
+}
+
+WHITESPACE = _{ " " | "\t" }
