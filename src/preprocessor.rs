@@ -13,7 +13,7 @@ impl Preprocessor {
         assert!(self.src.is_some(), "src file is not setted properly");
 
         if self.out.is_none() {
-            self.set_default_out_pathbuf();
+            self.set_out_file_to_default();
         }
 
         println!("Running the preprocessor");
@@ -34,7 +34,7 @@ impl Preprocessor {
         self.is_watch_mode = true;
     }
 
-    fn set_default_out_pathbuf(&mut self) {
+    fn set_out_file_to_default(&mut self) {
         // default out file will have the same filename
         // but with different extension
         let default = self
