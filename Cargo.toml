@@ -2,6 +2,7 @@
 name = "smiley"
 version = "0.1.0"
 edition = "2021"
+authors = ["Hafidh Muqsithanova Sukarno <hafidhmn@gmail.com>"]
 license = "BSD-3-Clause"
 
 [dependencies]
