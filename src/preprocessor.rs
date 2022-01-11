@@ -42,12 +42,13 @@ impl PreprocessorBuilder {
             Some(f) => f.to_path_buf(),
             None => {
                 debug!("No out file specified. Use default value");
-                self.preprocessor
-                    .borrow_mut()
-                    .src
-                    .as_deref()
-                    .expect("src file is not setted properly")
-                    .with_extension("css")
+                util::create_default_out_file_pathbuf(
+                    self.preprocessor
+                        .borrow_mut()
+                        .src
+                        .as_deref()
+                        .expect("src file is not setted properly"),
+                )
             }
         };
 
