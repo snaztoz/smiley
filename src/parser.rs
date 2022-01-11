@@ -30,8 +30,8 @@ impl Indentation {
                 return Ok(mode);
             }
 
-            let is_consistent = (matches!(mode, Indentation::Space) && c == ' ')
-                || (matches!(mode, Indentation::Tab) && c == '\t');
+            let is_consistent =
+                (mode == Indentation::Space && c == ' ') || (mode == Indentation::Tab && c == '\t');
 
             if !is_consistent {
                 return Err(());
