@@ -2,6 +2,8 @@
 #[grammar = "grammar/smiley.pest"]
 pub struct SmileyParser;
 
+type IndentationErrorPos = usize;
+
 #[derive(Debug, PartialEq)]
 pub enum Indentation {
     None,
@@ -10,13 +12,13 @@ pub enum Indentation {
 }
 
 impl Indentation {
-    pub fn check_mode(line: &str) -> Result<Indentation, ()> {
+    pub fn check_mode(line: &str) -> Result<Indentation, IndentationErrorPos> {
         if line.is_empty() {
             return Ok(Indentation::None);
         }
 
-        let mut chars = line.chars();
-        let first_char = chars.next();
+        let mut chars = line.chars().enumerate();
+        let first_char = chars.next().map(|(_, c)| c);
 
         let mode = match first_char {
             Some(c) if c == ' ' => Indentation::Space,
@@ -25,7 +27,7 @@ impl Indentation {
         };
 
         // check trailing chars
-        for c in chars {
+        for (i, c) in chars {
             if !c.is_ascii_whitespace() {
                 return Ok(mode);
             }
@@ -34,7 +36,7 @@ impl Indentation {
                 (mode == Indentation::Space && c == ' ') || (mode == Indentation::Tab && c == '\t');
 
             if !is_consistent {
-                return Err(());
+                return Err(i);
             }
         }
 
@@ -49,12 +51,12 @@ mod tests {
 
     #[test]
     fn line_indentation_mode_checking() {
-        let cases: Vec<(&str, Result<Indentation, ()>)> = vec![
+        let cases = vec![
             ("",        Ok(Indentation::None)),
             ("   ",     Ok(Indentation::Space)),
             ("\t\tfoo", Ok(Indentation::Tab)),
             ("foo",     Ok(Indentation::None)),
-            (" \tfoo",  Err(())),
+            (" \tfoo",  Err(1)),
         ];
 
         for (i, (line, expected)) in cases.iter().enumerate() {
