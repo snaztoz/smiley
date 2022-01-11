@@ -4,7 +4,7 @@ use clap::StructOpt;
 use clap_verbosity_flag::Verbosity;
 use env_logger::Builder as LoggerBuilder;
 use log::LevelFilter;
-use smiley::Preprocessor;
+use smiley::PreprocessorBuilder;
 use std::path::PathBuf;
 
 /// A (yet-another) simple CSS preprocessor
@@ -39,17 +39,10 @@ fn main() {
         )
         .init();
 
-    let mut preprocessor = Preprocessor::default();
-
-    preprocessor.set_src_file(&cli.src);
-
-    if let Some(out) = cli.out {
-        preprocessor.set_out_file(&out);
-    }
-
-    if cli.watch {
-        preprocessor.set_to_watch_mode();
-    }
-
-    preprocessor.run();
+    PreprocessorBuilder::default()
+        .with_src_file(&cli.src)
+        .with_out_file(cli.out.as_deref())
+        .in_watch_mode(cli.watch)
+        .build()
+        .run();
 }

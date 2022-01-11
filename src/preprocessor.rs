@@ -1,6 +1,9 @@
 use crate::util;
 use log::{debug, info};
-use std::path::{Path, PathBuf};
+use std::{
+    cell::RefCell,
+    path::{Path, PathBuf},
+};
 
 #[derive(Default)]
 pub struct Preprocessor {
@@ -12,46 +15,56 @@ pub struct Preprocessor {
 impl Preprocessor {
     pub fn run(&mut self) {
         assert!(self.src.is_some(), "src file is not setted properly");
-
-        if self.out.is_none() {
-            self.set_out_file_to_default();
-        }
+        assert!(self.out.is_some(), "out file is not setted properly");
 
         info!("Running the preprocessor");
     }
+}
 
-    pub fn set_src_file(&mut self, file: &Path) {
+#[derive(Default)]
+pub struct PreprocessorBuilder {
+    preprocessor: RefCell<Preprocessor>,
+}
+
+impl PreprocessorBuilder {
+    pub fn with_src_file(&self, file: &Path) -> &Self {
         util::assert_file_exists(file);
         util::assert_src_file_extension(file);
 
-        self.src = Some(file.to_path_buf());
+        debug!("Setting src file to `{}`", file.display());
+        self.preprocessor.borrow_mut().src = Some(file.to_path_buf());
 
-        debug!("The src file is setted to `{}`", file.display());
+        self
     }
 
-    pub fn set_out_file(&mut self, file: &Path) {
-        self.out = Some(file.to_path_buf());
+    pub fn with_out_file(&self, file: Option<&Path>) -> &Self {
+        let file = match file {
+            Some(f) => f.to_path_buf(),
+            None => {
+                debug!("No out file specified. Use default value");
+                self.preprocessor
+                    .borrow_mut()
+                    .src
+                    .as_deref()
+                    .expect("src file is not setted properly")
+                    .with_extension("css")
+            }
+        };
 
-        debug!("The out file is setted to `{}`", file.display());
+        debug!("Setting out file to `{}`", file.display());
+        self.preprocessor.borrow_mut().out = Some(file);
+
+        self
     }
 
-    pub fn set_to_watch_mode(&mut self) {
-        self.is_watch_mode = true;
+    pub fn in_watch_mode(&self, watch_mode: bool) -> &Self {
+        info!("Setting preprocessor to `watch` mode");
+        self.preprocessor.borrow_mut().is_watch_mode = watch_mode;
 
-        info!("Preprocessor is setted to `watch` mode");
+        self
     }
 
-    fn set_out_file_to_default(&mut self) {
-        debug!("Setting the out file to default");
-
-        // default out file will have the same filename
-        // but with different extension
-        let default = self
-            .src
-            .as_deref()
-            .expect("src file is not setted properly")
-            .with_extension("css");
-
-        self.set_out_file(&default);
+    pub fn build(&self) -> Preprocessor {
+        self.preprocessor.take()
     }
 }
