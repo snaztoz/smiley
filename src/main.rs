@@ -40,9 +40,9 @@ fn main() {
         .init();
 
     PreprocessorBuilder::default()
-        .with_src_file(&cli.src)
-        .with_out_file(cli.out.as_deref())
-        .in_watch_mode(cli.watch)
+        .set_src_file(&cli.src)
+        .set_out_file(cli.out.as_deref())
+        .set_watch_mode(cli.watch)
         .build()
         .run();
 }

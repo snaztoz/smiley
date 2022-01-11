@@ -27,7 +27,7 @@ pub struct PreprocessorBuilder {
 }
 
 impl PreprocessorBuilder {
-    pub fn with_src_file(&self, file: &Path) -> &Self {
+    pub fn set_src_file(&self, file: &Path) -> &Self {
         util::assert_file_exists(file);
         util::assert_src_file_extension(file);
 
@@ -37,7 +37,7 @@ impl PreprocessorBuilder {
         self
     }
 
-    pub fn with_out_file(&self, file: Option<&Path>) -> &Self {
+    pub fn set_out_file(&self, file: Option<&Path>) -> &Self {
         let file = match file {
             Some(f) => f.to_path_buf(),
             None => {
@@ -58,7 +58,7 @@ impl PreprocessorBuilder {
         self
     }
 
-    pub fn in_watch_mode(&self, watch_mode: bool) -> &Self {
+    pub fn set_watch_mode(&self, watch_mode: bool) -> &Self {
         info!("Setting preprocessor to `watch` mode");
         self.preprocessor.borrow_mut().is_watch_mode = watch_mode;
 
