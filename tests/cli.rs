@@ -31,7 +31,7 @@ fn run_with_non_existing_src_file() {
     cmd.assert()
         .failure()
         .stderr(predicate::str::contains(format!(
-            "file does not exists: {}",
+            "File does not exist: `{}`",
             filename
         )));
 }
@@ -46,5 +46,5 @@ fn run_with_invalid_src_file_extension() {
     cmd.arg(file.path());
     cmd.assert()
         .failure()
-        .stderr(predicate::str::contains("invalid extension"));
+        .stderr(predicate::str::contains("Invalid extension"));
 }
