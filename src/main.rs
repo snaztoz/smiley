@@ -1,9 +1,12 @@
-use clap::Parser;
+extern crate clap_verbosity_flag;
+
+use clap::StructOpt;
+use clap_verbosity_flag::Verbosity;
 use smiley::Preprocessor;
 use std::path::PathBuf;
 
 /// A (yet-another) simple CSS preprocessor
-#[derive(Parser, Debug)]
+#[derive(Debug, StructOpt)]
 #[clap(about, version)]
 struct Cli {
     /// Root source file
@@ -16,6 +19,9 @@ struct Cli {
     /// Specify the output file path
     #[clap(short, long)]
     out: Option<PathBuf>,
+
+    #[structopt(flatten)]
+    verbose: Verbosity,
 }
 
 fn main() {
