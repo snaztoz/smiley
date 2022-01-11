@@ -1,4 +1,5 @@
 use crate::util;
+use log::{debug, info};
 use std::path::{Path, PathBuf};
 
 #[derive(Default)]
@@ -16,7 +17,7 @@ impl Preprocessor {
             self.set_out_file_to_default();
         }
 
-        println!("Running the preprocessor");
+        info!("Running the preprocessor");
     }
 
     pub fn set_src_file(&mut self, file: &Path) {
@@ -24,17 +25,25 @@ impl Preprocessor {
         util::assert_src_file_extension(file);
 
         self.src = Some(file.to_path_buf());
+
+        debug!("The src file is setted to `{}`", file.display());
     }
 
     pub fn set_out_file(&mut self, file: &Path) {
         self.out = Some(file.to_path_buf());
+
+        debug!("The out file is setted to `{}`", file.display());
     }
 
     pub fn set_to_watch_mode(&mut self) {
         self.is_watch_mode = true;
+
+        info!("Preprocessor is setted to `watch` mode");
     }
 
     fn set_out_file_to_default(&mut self) {
+        debug!("Setting the out file to default");
+
         // default out file will have the same filename
         // but with different extension
         let default = self
