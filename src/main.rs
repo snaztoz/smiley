@@ -2,6 +2,8 @@ extern crate clap_verbosity_flag;
 
 use clap::StructOpt;
 use clap_verbosity_flag::Verbosity;
+use env_logger::Builder as LoggerBuilder;
+use log::LevelFilter;
 use smiley::Preprocessor;
 use std::path::PathBuf;
 
@@ -26,6 +28,17 @@ struct Cli {
 
 fn main() {
     let cli = Cli::parse();
+
+    LoggerBuilder::new()
+        .format_target(false)
+        .format_timestamp(None)
+        .filter_level(
+            cli.verbose
+                .log_level()
+                .map_or(LevelFilter::Off, |level| level.to_level_filter()),
+        )
+        .init();
+
     let mut preprocessor = Preprocessor::default();
 
     preprocessor.set_src_file(&cli.src);
