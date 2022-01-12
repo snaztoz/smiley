@@ -1,4 +1,8 @@
-use crate::{error, parser::Indentation, util};
+use crate::{
+    error,
+    parser::{Indentation, IndentationMode},
+    util,
+};
 use log::{debug, info};
 use std::{
     cell::RefCell,
@@ -13,7 +17,7 @@ pub struct Preprocessor {
     out: Option<PathBuf>,
     is_watch_mode: bool,
 
-    indentation_mode: Option<Indentation>,
+    indent_type: Option<Indentation>,
     current_row: usize,
 }
 
@@ -35,12 +39,13 @@ impl Preprocessor {
                 continue;
             }
 
-            let mode = self.get_line_indentation_mode(line);
-            self.handle_line_indentation_mode(mode);
+            if let Some(indent) = self.get_line_indentation_mode(line) {
+                self.handle_line_indentation(indent);
+            }
         }
     }
 
-    fn get_line_indentation_mode(&self, line: &str) -> Indentation {
+    fn get_line_indentation_mode(&self, line: &str) -> IndentationMode {
         match Indentation::check_mode(line) {
             Ok(m) => m,
             Err(col) => {
@@ -56,31 +61,25 @@ impl Preprocessor {
         }
     }
 
-    fn handle_line_indentation_mode(&mut self, mode: Indentation) {
-        if mode != Indentation::None {
-            match self.indentation_mode {
-                Some(_) => self.validate_indentation_mode(mode),
-                None => self.set_indentation_mode(mode),
-            }
+    fn handle_line_indentation(&mut self, indent: Indentation) {
+        match self.indent_type {
+            Some(_) => self.validate_indentation_mode(indent),
+            None => self.set_used_indentation_type(indent),
         }
     }
 
-    fn set_indentation_mode(&mut self, mode: Indentation) {
-        assert_ne!(mode, Indentation::None);
-
-        if mode == Indentation::Space {
+    fn set_used_indentation_type(&mut self, indent: Indentation) {
+        if indent == Indentation::Space {
             debug!("Setting indentation mode to `space`");
         } else {
             debug!("Setting indentation mode to `tab`");
         }
 
-        self.indentation_mode = Some(mode);
+        self.indent_type = Some(indent);
     }
 
-    fn validate_indentation_mode(&self, mode: Indentation) {
-        assert_ne!(mode, Indentation::None);
-
-        if mode != *self.indentation_mode.as_ref().unwrap() {
+    fn validate_indentation_mode(&self, indent: Indentation) {
+        if indent != *self.indent_type.as_ref().unwrap() {
             error::report(
                 self.src.as_deref().unwrap(),
                 self.current_row,
