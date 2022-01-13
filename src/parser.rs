@@ -6,7 +6,7 @@ type IndentationErrorPos = usize;
 pub type IndentationMode = Option<(Indentation, IndentationLevel)>;
 pub type IndentationLevel = usize;
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Indentation {
     Space,
     Tab,

@@ -3,10 +3,10 @@ use crate::{
     parser::{Indentation, IndentationMode},
     util,
 };
+use itertools::Itertools;
 use log::{debug, info};
 use std::{
     cell::RefCell,
-    fs,
     path::{Path, PathBuf},
     process,
 };
@@ -28,9 +28,9 @@ impl Preprocessor {
 
         info!("Running the preprocessor");
 
-        let file = fs::read_to_string(self.src.as_ref().unwrap()).unwrap();
+        let lines = self.read_src_file_lines();
 
-        for line in file.lines() {
+        for ((line, indent_mode), _) in lines.iter().tuple_windows() {
             self.current_row += 1;
 
             // skip if the line does not contain any character
@@ -39,48 +39,47 @@ impl Preprocessor {
                 continue;
             }
 
-            if let Some((indent, _)) = self.get_line_indentation_mode(line) {
-                self.handle_line_indentation(indent);
+            if let Some((indent, _)) = indent_mode {
+                self.handle_indentation_type(*indent);
             }
         }
     }
 
-    fn get_line_indentation_mode(&self, line: &str) -> IndentationMode {
-        let mode = Indentation::check_mode(line);
+    fn read_src_file_lines(&self) -> Vec<(String, IndentationMode)> {
+        debug!("Reading src file content");
 
-        if let Err(col) = mode {
-            error::report(
-                self.src.as_deref().unwrap(),
-                self.current_row,
-                col,
-                "Inconsistent indentation: Smiley src files should only use either \
-                space\n\tor tab as indentation character, but not both",
-            );
+        let file_content = util::read_file_with_empty_line_appended(self.src.as_ref().unwrap());
 
-            process::exit(1);
-        }
+        let lines = file_content
+            .lines()
+            .map(|line| match Indentation::check_mode(line) {
+                Ok(mode) => (line.to_string(), mode),
 
-        mode.unwrap()
+                Err(col) => {
+                    error::report(
+                        self.src.as_deref().unwrap(),
+                        self.current_row,
+                        col,
+                        "Inconsistent indentation: Smiley src files should only use either \
+                        space\n\tor tab as indentation character, but not both",
+                    );
+
+                    process::exit(1);
+                }
+            })
+            .collect::<Vec<_>>();
+
+        lines
     }
 
-    fn handle_line_indentation(&mut self, indent: Indentation) {
+    fn handle_indentation_type(&mut self, indent: Indentation) {
         match self.indent_type {
             Some(_) => self.validate_indentation_mode(indent),
-            None => self.set_used_indentation_type(indent),
+            None => self.set_indentation_type(indent),
         }
     }
 
-    fn set_used_indentation_type(&mut self, indent: Indentation) {
-        if indent == Indentation::Space {
-            debug!("Setting indentation mode to `space`");
-        } else {
-            debug!("Setting indentation mode to `tab`");
-        }
-
-        self.indent_type = Some(indent);
-    }
-
-    fn validate_indentation_mode(&self, indent: Indentation) {
+    fn validate_indentation_mode(&mut self, indent: Indentation) {
         if indent != *self.indent_type.as_ref().unwrap() {
             error::report(
                 self.src.as_deref().unwrap(),
@@ -92,6 +91,16 @@ impl Preprocessor {
 
             process::exit(1);
         }
+    }
+
+    fn set_indentation_type(&mut self, indent: Indentation) {
+        if indent == Indentation::Space {
+            debug!("Setting indentation mode to `space`");
+        } else {
+            debug!("Setting indentation mode to `tab`");
+        }
+
+        self.indent_type = Some(indent);
     }
 }
 
