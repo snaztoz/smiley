@@ -46,19 +46,21 @@ impl Preprocessor {
     }
 
     fn get_line_indentation_mode(&self, line: &str) -> IndentationMode {
-        match Indentation::check_mode(line) {
-            Ok(m) => m,
-            Err(col) => {
-                error::report(
-                    self.src.as_deref().unwrap(),
-                    self.current_row,
-                    col,
-                    "Inconsistent indentation: Smiley src files should only use either \
-                    space\n\tor tab as indentation character, but not both",
-                );
-                process::exit(1);
-            }
+        let mode = Indentation::check_mode(line);
+
+        if let Err(col) = mode {
+            error::report(
+                self.src.as_deref().unwrap(),
+                self.current_row,
+                col,
+                "Inconsistent indentation: Smiley src files should only use either \
+                space\n\tor tab as indentation character, but not both",
+            );
+
+            process::exit(1);
         }
+
+        mode.unwrap()
     }
 
     fn handle_line_indentation(&mut self, indent: Indentation) {
