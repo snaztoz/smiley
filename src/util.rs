@@ -1,5 +1,6 @@
 use log::error;
 use std::{
+    fs,
     path::{Path, PathBuf},
     process,
 };
@@ -29,9 +30,17 @@ pub fn create_default_out_file_pathbuf(file: &Path) -> PathBuf {
     Path::new(file.file_name().unwrap()).to_path_buf()
 }
 
+pub fn read_file_with_empty_line_appended(file: &Path) -> String {
+    let mut content = fs::read_to_string(file).unwrap().trim_end().to_string();
+    content.push_str("\n\n");
+
+    content
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use assert_fs::fixture::{FileWriteStr, NamedTempFile};
 
     #[test]
     fn default_out_file_pathbuf_creation() {
@@ -39,5 +48,26 @@ mod tests {
         let pathbuf = create_default_out_file_pathbuf(&src);
 
         assert_eq!(pathbuf.as_os_str(), "src.css");
+    }
+
+    #[test]
+    fn read_file_with_empty_line_appended_checking() {
+        let cases = [
+            (" foo", " foo\n\n"),
+            ("bar\n", "bar\n\n"),
+            ("baz\n\n\n", "baz\n\n"),
+        ];
+
+        for (i, (content, expected)) in cases.iter().enumerate() {
+            let file = NamedTempFile::new("foo").unwrap();
+            file.write_str(content).unwrap();
+
+            assert_eq!(
+                &read_file_with_empty_line_appended(file.path()),
+                expected,
+                "failed at test case {}",
+                i + 1
+            );
+        }
     }
 }
