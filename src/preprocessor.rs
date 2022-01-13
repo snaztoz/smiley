@@ -39,7 +39,7 @@ impl Preprocessor {
                 continue;
             }
 
-            if let Some(indent) = self.get_line_indentation_mode(line) {
+            if let Some((indent, _)) = self.get_line_indentation_mode(line) {
                 self.handle_line_indentation(indent);
             }
         }

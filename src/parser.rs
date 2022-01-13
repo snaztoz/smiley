@@ -3,7 +3,8 @@
 pub struct SmileyParser;
 
 type IndentationErrorPos = usize;
-pub type IndentationMode = Option<Indentation>;
+pub type IndentationMode = Option<(Indentation, IndentationLevel)>;
+pub type IndentationLevel = usize;
 
 #[derive(Debug, PartialEq)]
 pub enum Indentation {
@@ -29,7 +30,7 @@ impl Indentation {
         // check trailing chars
         for (i, c) in chars {
             if !c.is_ascii_whitespace() {
-                return Ok(Some(mode));
+                return Ok(Some((mode, i)));
             }
 
             let is_consistent =
@@ -40,7 +41,7 @@ impl Indentation {
             }
         }
 
-        Ok(Some(mode))
+        Ok(Some((mode, line.len())))
     }
 }
 
@@ -53,8 +54,8 @@ mod tests {
     fn line_indentation_mode_checking() {
         let cases = vec![
             ("",        Ok(None)),
-            ("   ",     Ok(Some(Indentation::Space))),
-            ("\t\tfoo", Ok(Some(Indentation::Tab))),
+            ("   ",     Ok(Some((Indentation::Space, 3)))),
+            ("\t\tfoo", Ok(Some((Indentation::Tab, 2)))),
             ("foo",     Ok(None)),
             (" \tfoo",  Err(1)),
         ];
