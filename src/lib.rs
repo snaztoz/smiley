@@ -2,7 +2,7 @@ extern crate pest;
 #[macro_use]
 extern crate pest_derive;
 
-pub use preprocessor::PreprocessorBuilder;
+pub use preprocessor::builder::PreprocessorBuilder;
 
 mod error;
 mod parser;
