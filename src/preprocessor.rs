@@ -7,7 +7,7 @@ use std::{fs, path::PathBuf, process};
 
 pub mod builder;
 mod indentation;
-mod line;
+pub mod line;
 
 #[derive(Default)]
 pub struct Preprocessor {
@@ -50,13 +50,8 @@ impl Preprocessor {
                 },
 
                 Err(col) => {
-                    error::report(
-                        self.src.as_deref().unwrap(),
-                        i + 1,
-                        col,
-                        "Inconsistent indentation: Smiley src files should only use either \
-                        space\n\tor tab as indentation character, but not both",
-                    );
+                    let src = self.src.as_deref().unwrap();
+                    error::report_indentation_error(src, i + 1, col);
                     process::exit(1);
                 }
             })
@@ -74,13 +69,8 @@ impl Preprocessor {
 
     fn handle_indentation(&mut self, line: &Line) {
         if let Err((row, col)) = self.indent_checker.validate(line) {
-            error::report(
-                self.src.as_deref().unwrap(),
-                row,
-                col,
-                "Inconsistent indentation: Smiley src files should only use either \
-                space\n\tor tab as indentation character, but not both",
-            );
+            let src = self.src.as_deref().unwrap();
+            error::report_indentation_error(src, row, col);
             process::exit(1);
         }
     }
