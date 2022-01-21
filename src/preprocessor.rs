@@ -28,7 +28,7 @@ impl Preprocessor {
         let lines = self.read_src_file_lines();
 
         for (line, _) in lines.iter().tuple_windows::<(&Line, &Line)>() {
-            self.handle_indentation(line);
+            self.validate_indentation(line);
         }
     }
 
@@ -67,7 +67,7 @@ impl Preprocessor {
         lines
     }
 
-    fn handle_indentation(&mut self, line: &Line) {
+    fn validate_indentation(&mut self, line: &Line) {
         if let Err((row, col)) = self.indent_checker.validate(line) {
             let src = self.src.as_deref().unwrap();
             error::report_indentation_error(src, row, col);
