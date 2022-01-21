@@ -1,13 +1,11 @@
-use crate::{
-    error,
-    parser::{Indentation, IndentationMode},
-    util,
-};
+use crate::{error, util};
+use indentation::{Indentation, IndentationMode};
 use itertools::Itertools;
 use log::{debug, info};
 use std::{path::PathBuf, process};
 
 pub mod builder;
+mod indentation;
 
 #[derive(Default)]
 pub struct Preprocessor {
