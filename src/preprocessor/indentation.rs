@@ -1,4 +1,6 @@
-type IndentationErrorPos = usize;
+use super::line::{Col, Line, Row};
+use log::debug;
+
 pub type IndentationMode = Option<(Indentation, IndentationLevel)>;
 pub type IndentationLevel = usize;
 
@@ -9,7 +11,7 @@ pub enum Indentation {
 }
 
 impl Indentation {
-    pub fn check_mode(line: &str) -> Result<IndentationMode, IndentationErrorPos> {
+    pub fn check_mode(line: &str) -> Result<IndentationMode, Col> {
         if line.is_empty() {
             return Ok(None);
         }
@@ -38,6 +40,55 @@ impl Indentation {
         }
 
         Ok(Some((mode, line.len())))
+    }
+}
+
+#[derive(Default)]
+pub struct Checker {
+    used_type: Option<Indentation>,
+}
+
+impl Checker {
+    pub fn validate(&mut self, line: &Line) -> Result<(), (Row, Col)> {
+        if line.indentation_mode.is_none() {
+            return Ok(());
+        }
+
+        let (indent, _) = line.indentation_mode.unwrap();
+
+        if self.handle_indentation(&indent).is_err() {
+            Err((line.row, 0))
+        } else {
+            Ok(())
+        }
+    }
+
+    fn handle_indentation(&mut self, indent: &Indentation) -> Result<(), ()> {
+        match self.used_type {
+            Some(_) => self.validate_indentation_type(indent),
+            None => {
+                self.set_indentation_mode(indent);
+                Ok(())
+            }
+        }
+    }
+
+    fn validate_indentation_type(&self, indent: &Indentation) -> Result<(), ()> {
+        if indent != self.used_type.as_ref().unwrap() {
+            Err(())
+        } else {
+            Ok(())
+        }
+    }
+
+    fn set_indentation_mode(&mut self, indent: &Indentation) {
+        if *indent == Indentation::Space {
+            debug!("Setting indentation mode to `space`");
+        } else {
+            debug!("Setting indentation mode to `tab`");
+        }
+
+        self.used_type = Some(*indent);
     }
 }
 

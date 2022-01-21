@@ -1,8 +1,11 @@
 use super::indentation::IndentationMode;
 
+pub type Row = usize;
+pub type Col = usize;
+
 #[derive(Clone, Debug)]
 pub struct Line {
-    pub row: usize,
+    pub row: Row,
     pub content: Content,
     pub indentation_mode: IndentationMode,
 }

@@ -1,5 +1,5 @@
 use crate::error;
-use indentation::Indentation;
+use indentation::{Checker as IndentationChecker, Indentation};
 use itertools::Itertools;
 use line::{Content as LineContent, Line};
 use log::{debug, info};
@@ -15,8 +15,7 @@ pub struct Preprocessor {
     out: Option<PathBuf>,
     is_watch_mode: bool,
 
-    indent_type: Option<Indentation>,
-    current_row: usize,
+    indent_checker: IndentationChecker,
 }
 
 impl Preprocessor {
@@ -29,11 +28,7 @@ impl Preprocessor {
         let lines = self.read_src_file_lines();
 
         for (line, _) in lines.iter().tuple_windows::<(&Line, &Line)>() {
-            self.current_row = line.row;
-
-            if let Some((indent, _)) = line.indentation_mode {
-                self.handle_indentation_type(indent);
-            }
+            self.handle_indentation(line);
         }
     }
 
@@ -77,33 +72,16 @@ impl Preprocessor {
         lines
     }
 
-    fn handle_indentation_type(&mut self, indent: Indentation) {
-        match self.indent_type {
-            Some(_) => self.validate_indentation_mode(indent),
-            None => self.set_indentation_type(indent),
-        }
-    }
-
-    fn validate_indentation_mode(&mut self, indent: Indentation) {
-        if indent != *self.indent_type.as_ref().unwrap() {
+    fn handle_indentation(&mut self, line: &Line) {
+        if let Err((row, col)) = self.indent_checker.validate(line) {
             error::report(
                 self.src.as_deref().unwrap(),
-                self.current_row,
-                0,
+                row,
+                col,
                 "Inconsistent indentation: Smiley src files should only use either \
                 space\n\tor tab as indentation character, but not both",
             );
             process::exit(1);
         }
-    }
-
-    fn set_indentation_type(&mut self, indent: Indentation) {
-        if indent == Indentation::Space {
-            debug!("Setting indentation mode to `space`");
-        } else {
-            debug!("Setting indentation mode to `tab`");
-        }
-
-        self.indent_type = Some(indent);
     }
 }
