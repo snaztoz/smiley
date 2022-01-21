@@ -1,9 +1,9 @@
-use crate::{error, util};
+use crate::error;
 use indentation::Indentation;
 use itertools::Itertools;
 use line::{Content as LineContent, Line};
 use log::{debug, info};
-use std::{path::PathBuf, process};
+use std::{fs, path::PathBuf, process};
 
 pub mod builder;
 mod indentation;
@@ -40,7 +40,8 @@ impl Preprocessor {
     fn read_src_file_lines(&self) -> Vec<Line> {
         debug!("Reading src file content");
 
-        let file_content = util::read_file_with_empty_line_appended(self.src.as_ref().unwrap());
+        let file_path = self.src.as_ref().unwrap();
+        let file_content = fs::read_to_string(file_path).unwrap();
 
         let mut lines = file_content
             .lines()
@@ -61,7 +62,6 @@ impl Preprocessor {
                         "Inconsistent indentation: Smiley src files should only use either \
                         space\n\tor tab as indentation character, but not both",
                     );
-
                     process::exit(1);
                 }
             })
@@ -93,7 +93,6 @@ impl Preprocessor {
                 "Inconsistent indentation: Smiley src files should only use either \
                 space\n\tor tab as indentation character, but not both",
             );
-
             process::exit(1);
         }
     }
