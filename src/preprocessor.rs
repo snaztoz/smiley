@@ -45,7 +45,9 @@ impl Preprocessor {
             .map(|(i, line)| match Indentation::check_mode(line) {
                 Ok(mode) => Line {
                     row: i + 1,
-                    content: LineContent::Value(line.to_string()),
+                    // remove indentations, and put the information
+                    // inside indentation_mode instead
+                    content: LineContent::Value(line.trim().to_string()),
                     indentation_mode: mode,
                 },
 
