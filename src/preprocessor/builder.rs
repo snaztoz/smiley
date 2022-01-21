@@ -3,11 +3,11 @@ use log::{debug, info};
 use std::{cell::RefCell, path::Path};
 
 #[derive(Default)]
-pub struct PreprocessorBuilder {
+pub struct Builder {
     preprocessor: RefCell<Preprocessor>,
 }
 
-impl PreprocessorBuilder {
+impl Builder {
     pub fn set_src_file(&self, file: &Path) -> &Self {
         util::assert_file_exists(file);
         util::assert_src_file_extension(file);
