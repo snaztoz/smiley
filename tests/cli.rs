@@ -51,7 +51,7 @@ fn run_with_invalid_src_file_extension() {
 
 #[test]
 fn run_with_inconsistent_indentations() {
-    let file = NamedTempFile::new("srcfile.smly").unwrap();
+    let file = NamedTempFile::new("inconsistent.smly").unwrap();
     file.write_str("foo\n  bar\n\tbaz").unwrap();
     let mut cmd = Command::cargo_bin("smiley").unwrap();
 

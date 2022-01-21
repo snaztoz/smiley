@@ -1,11 +1,13 @@
 use crate::{error, util};
-use indentation::{Indentation, IndentationMode};
+use indentation::Indentation;
 use itertools::Itertools;
+use line::{Content as LineContent, Line};
 use log::{debug, info};
 use std::{path::PathBuf, process};
 
 pub mod builder;
 mod indentation;
+mod line;
 
 #[derive(Default)]
 pub struct Preprocessor {
@@ -26,35 +28,35 @@ impl Preprocessor {
 
         let lines = self.read_src_file_lines();
 
-        for ((line, indent_mode), _) in lines.iter().tuple_windows() {
-            self.current_row += 1;
+        for (line, _) in lines.iter().tuple_windows::<(&Line, &Line)>() {
+            self.current_row = line.row;
 
-            // skip if the line does not contain any character
-            // other than whitespaces
-            if line.trim().is_empty() {
-                continue;
-            }
-
-            if let Some((indent, _)) = indent_mode {
-                self.handle_indentation_type(*indent);
+            if let Some((indent, _)) = line.indentation_mode {
+                self.handle_indentation_type(indent);
             }
         }
     }
 
-    fn read_src_file_lines(&self) -> Vec<(String, IndentationMode)> {
+    fn read_src_file_lines(&self) -> Vec<Line> {
         debug!("Reading src file content");
 
         let file_content = util::read_file_with_empty_line_appended(self.src.as_ref().unwrap());
 
-        let lines = file_content
+        let mut lines = file_content
             .lines()
-            .map(|line| match Indentation::check_mode(line) {
-                Ok(mode) => (line.to_string(), mode),
+            .enumerate()
+            .filter(|(_, line)| !line.trim().is_empty())
+            .map(|(i, line)| match Indentation::check_mode(line) {
+                Ok(mode) => Line {
+                    row: i + 1,
+                    content: LineContent::Value(line.to_string()),
+                    indentation_mode: mode,
+                },
 
                 Err(col) => {
                     error::report(
                         self.src.as_deref().unwrap(),
-                        self.current_row,
+                        i + 1,
                         col,
                         "Inconsistent indentation: Smiley src files should only use either \
                         space\n\tor tab as indentation character, but not both",
@@ -64,6 +66,13 @@ impl Preprocessor {
                 }
             })
             .collect::<Vec<_>>();
+
+        // Append EOF
+        lines.push(Line {
+            row: usize::MAX, // doesn't really matter
+            content: LineContent::Eof,
+            indentation_mode: None,
+        });
 
         lines
     }
