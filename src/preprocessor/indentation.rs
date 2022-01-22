@@ -56,11 +56,7 @@ impl Checker {
 
         let (indent, _) = line.indentation_mode.unwrap();
 
-        if self.handle_indentation(&indent).is_err() {
-            Err((line.row, 0))
-        } else {
-            Ok(())
-        }
+        self.handle_indentation(&indent).map_err(|_| (line.row, 0))
     }
 
     fn handle_indentation(&mut self, indent: &Indentation) -> Result<(), ()> {
