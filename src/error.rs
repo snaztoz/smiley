@@ -14,7 +14,8 @@ pub fn report(file: &Path, row: Row, col: Col, message: &str) {
     |   `{}`
     |
     ",
-        location, line.escape_default()
+        location,
+        line.escape_default()
     );
 
     error!("{}\n\n\t{}", message, err_report);
