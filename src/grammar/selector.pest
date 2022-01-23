@@ -1,0 +1,50 @@
+selector = {
+    SOI ~
+    basic_selector ~
+    EOI
+}
+
+basic_selector = @{
+    element_name ~ (id | class | attr)*
+    | (id | class | attr)+
+}
+
+element_name = {
+    ident | "*"
+}
+
+id = @{
+    "#" ~ ident
+}
+
+class = @{
+    "." ~ ident
+}
+
+// implicit whitespaces won't be permitted here because
+// the rule inherit atomicity from basic_selector
+attr = _{
+    "[" ~                           WS* ~
+    ident ~                         WS* ~
+    attr_op ~                       WS* ~
+    (ident | string) ~              WS* ~
+    (("i" | "I") | ("s" | "S"))? ~  WS* ~
+    "]"
+}
+
+attr_op = @{
+    ("~" | "|" | "^" | "$" | "*")? ~ "="
+}
+
+ident = @{
+    (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")*
+}
+
+string = _{
+    ("\"" ~ (!"\"" ~ ANY)* ~ "\"")
+    | ("'" ~ (!"'" ~ ANY)* ~ "'")
+}
+
+WS = { " " | "\t" }
+
+WHITESPACE = _{ WS }
