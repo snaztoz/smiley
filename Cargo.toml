@@ -3,7 +3,14 @@ name = "smiley"
 version = "0.1.0"
 edition = "2021"
 authors = ["Hafidh Muqsithanova Sukarno <hafidhmn@gmail.com>"]
+rust-version = "1.58.1"
+description = "A (yet-another) simple CSS preprocessor"
+readme = "README.md"
+repository = "https://github.com/snaztoz/smiley"
 license = "BSD-3-Clause"
+license-file = "LICENSE"
+keywords = ["CSS", "preprocessor"]
+categories = ["command-line-utilities", "compilers"]
 
 [dependencies]
 clap = { version = "3.0.5", features = ["derive"] }
