@@ -11,14 +11,14 @@ pub struct Line {
 }
 
 impl Line {
-    pub fn determine_type(line: &Line, next_line: &Line) -> CssLineType {
+    pub fn determine_kind(line: &Line, next_line: &Line) -> CssLineKind {
         let level = line.get_indentation_level();
         let next_level = next_line.get_indentation_level();
 
         if level < next_level {
-            CssLineType::Selector
+            CssLineKind::Selector
         } else {
-            CssLineType::Property
+            CssLineKind::Property
         }
     }
 
@@ -34,7 +34,7 @@ pub enum Content {
 }
 
 #[derive(Debug, PartialEq)]
-pub enum CssLineType {
+pub enum CssLineKind {
     Selector,
     Property,
 }
@@ -74,23 +74,23 @@ mod tests {
         ];
 
         let expected_types = vec![
-            CssLineType::Selector,
-            CssLineType::Selector,
-            CssLineType::Property,
-            CssLineType::Property,
-            CssLineType::Selector,
-            CssLineType::Property,
-            CssLineType::Property,
-            CssLineType::Selector,
-            CssLineType::Property,
-            CssLineType::Property,
+            CssLineKind::Selector,
+            CssLineKind::Selector,
+            CssLineKind::Property,
+            CssLineKind::Property,
+            CssLineKind::Selector,
+            CssLineKind::Property,
+            CssLineKind::Property,
+            CssLineKind::Selector,
+            CssLineKind::Property,
+            CssLineKind::Property,
         ];
 
         let pass = lines
             .iter()
             .tuple_windows()
             .enumerate()
-            .all(|(i, (line, next))| Line::determine_type(line, next) == expected_types[i]);
+            .all(|(i, (line, next))| Line::determine_kind(line, next) == expected_types[i]);
 
         assert!(pass);
     }
