@@ -1,5 +1,6 @@
 use assert_cmd::prelude::*;
 use assert_fs::fixture::{FileWriteStr, NamedTempFile};
+use indoc::indoc;
 use predicates::prelude::*;
 use std::process::Command;
 
@@ -59,4 +60,31 @@ fn run_with_inconsistent_indentations() {
     cmd.assert()
         .failure()
         .stderr(predicate::str::contains("Inconsistent indentation"));
+}
+
+#[test]
+fn run_with_unexpected_indentations() {
+    let cases = [
+        // indentation at first non-empty line
+        indoc! {"
+            \tfoo
+        "},
+        // unexpected indentation level
+        indoc! {"
+            foo
+                bar
+                    baz
+              bat
+        "},
+    ];
+
+    for case in &cases {
+        let file = NamedTempFile::new("unexpected_indent.smly").unwrap();
+        file.write_str(case).unwrap();
+
+        let mut cmd = Command::cargo_bin("smiley").unwrap();
+        cmd.arg(file.path());
+
+        cmd.assert().failure();
+    }
 }
