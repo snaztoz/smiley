@@ -47,7 +47,7 @@ impl Indentation {
 
 #[derive(Default)]
 pub struct Checker {
-    used_type: Option<Indentation>,
+    indentation_type: Option<Indentation>,
     indentation_level_stack: Vec<IndentationLevel>,
 }
 
@@ -58,38 +58,38 @@ impl Checker {
             return Ok(());
         }
 
-        self.handle_indentation(line)?;
-        self.handle_indentation_level(line)?;
+        self.validate_indentation_type(line)?;
+        self.validate_indentation_level(line)?;
 
         Ok(())
     }
 
-    fn handle_indentation(&mut self, line: &Line) -> Result<(), Error> {
+    fn validate_indentation_type(&mut self, line: &Line) -> Result<(), Error> {
         let (indent, _) = line.indentation_mode.unwrap();
 
-        if self.used_type.is_none() {
-            self.set_indentation_mode(&indent);
+        if self.indentation_type.is_none() {
+            self.set_indentation_type(&indent);
             return Ok(());
         }
 
-        if indent != *self.used_type.as_ref().unwrap() {
+        if indent != *self.indentation_type.as_ref().unwrap() {
             Err((ErrorKind::InconsistentIndentation, (line.row, 0)))
         } else {
             Ok(())
         }
     }
 
-    fn set_indentation_mode(&mut self, indent: &Indentation) {
+    fn set_indentation_type(&mut self, indent: &Indentation) {
         if *indent == Indentation::Space {
             debug!("Setting indentation mode to `space`");
         } else {
             debug!("Setting indentation mode to `tab`");
         }
 
-        self.used_type = Some(*indent);
+        self.indentation_type = Some(*indent);
     }
 
-    fn handle_indentation_level(&mut self, line: &Line) -> Result<(), Error> {
+    fn validate_indentation_level(&mut self, line: &Line) -> Result<(), Error> {
         // this will prevent non-zero indentation at first
         // non-empty line
         if self.indentation_level_stack.is_empty() {
