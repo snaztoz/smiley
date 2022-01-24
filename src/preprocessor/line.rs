@@ -30,7 +30,7 @@ impl Line {
         }
     }
 
-    pub fn get_indentation_level(&self) -> Option<usize> {
+    fn get_indentation_level(&self) -> Option<usize> {
         self.indentation_mode.map(|(_, level)| level)
     }
 }
