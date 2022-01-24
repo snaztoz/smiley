@@ -1,4 +1,4 @@
-use super::indentation::IndentationMode;
+use super::indentation::{Indentation, IndentationMode};
 
 pub type Row = usize;
 pub type Col = usize;
@@ -11,6 +11,18 @@ pub struct Line {
 }
 
 impl Line {
+    pub fn try_from(line: &str, row: Row) -> Result<Self, Col> {
+        Indentation::check_mode(line).map(|mode| {
+            Self {
+                // remove indentations, and put the information
+                // inside indentation_mode instead
+                content: Content::Value(line.trim().to_string()),
+                indentation_mode: mode,
+                row,
+            }
+        })
+    }
+
     pub fn determine_kind(line: &Line, next_line: &Line) -> CssLineKind {
         let level = line.get_indentation_level();
         let next_level = next_line.get_indentation_level();

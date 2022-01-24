@@ -1,9 +1,7 @@
 use crate::error;
-use indentation::{
-    ErrorKind as IndentationErrorKind, Indentation, Validator as IndentationValidator,
-};
+use indentation::{ErrorKind as IndentationErrorKind, Validator as IndentationValidator};
 use itertools::Itertools;
-use line::{Content as LineContent, Line};
+use line::Line;
 use log::{debug, info};
 use std::{fs, path::PathBuf, process};
 
@@ -44,25 +42,19 @@ impl Preprocessor {
             .lines()
             .enumerate()
             .filter(|(_, line)| !line.trim().is_empty())
-            .map(|(i, line)| match Indentation::check_mode(line) {
-                Ok(mode) => Line {
-                    row: i + 1,
-                    // remove indentations, and put the information
-                    // inside indentation_mode instead
-                    content: LineContent::Value(line.trim().to_string()),
-                    indentation_mode: mode,
-                },
+            .map(|(i, line)| {
+                let row = i + 1;
 
-                Err(col) => {
+                Line::try_from(line, row).unwrap_or_else(|col| {
                     let src = self.src.as_deref().unwrap();
                     error::report_indentation_error(
                         src,
                         IndentationErrorKind::InconsistentIndentation,
-                        i + 1,
+                        row,
                         col,
                     );
                     process::exit(1);
-                }
+                })
             })
             .chain([Line::eof()])
             .collect::<Vec<_>>()
