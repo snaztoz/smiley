@@ -46,12 +46,12 @@ impl Indentation {
 }
 
 #[derive(Default)]
-pub struct Checker {
+pub struct Validator {
     indentation_type: Option<Indentation>,
     indentation_level_stack: Vec<IndentationLevel>,
 }
 
-impl Checker {
+impl Validator {
     pub fn validate(&mut self, line: &Line) -> Result<(), Error> {
         if line.indentation_mode.is_none() {
             self.set_stack_level_to_zero();

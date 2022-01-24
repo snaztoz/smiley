@@ -1,5 +1,7 @@
 use crate::error;
-use indentation::{Checker as IndentationChecker, ErrorKind as IndentationErrorKind, Indentation};
+use indentation::{
+    ErrorKind as IndentationErrorKind, Indentation, Validator as IndentationValidator,
+};
 use itertools::Itertools;
 use line::{Content as LineContent, Line};
 use log::{debug, info};
@@ -15,7 +17,7 @@ pub struct Preprocessor {
     out: Option<PathBuf>,
     is_watch_mode: bool,
 
-    indent_checker: IndentationChecker,
+    indent_validator: IndentationValidator,
 }
 
 impl Preprocessor {
@@ -67,7 +69,7 @@ impl Preprocessor {
     }
 
     fn validate_indentation(&mut self, line: &Line) {
-        if let Err(err) = self.indent_checker.validate(line) {
+        if let Err(err) = self.indent_validator.validate(line) {
             let src = self.src.as_deref().unwrap();
             let (kind, (row, col)) = err;
 
