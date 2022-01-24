@@ -10,8 +10,8 @@ fn run_with_src_file() {
     file.write_str("").unwrap();
 
     let mut cmd = Command::cargo_bin("smiley").unwrap();
-
     cmd.arg(file.path());
+
     cmd.assert().success();
 }
 
@@ -27,8 +27,8 @@ fn run_with_non_existing_src_file() {
     let filename = "a-non-existing-src-file";
 
     let mut cmd = Command::cargo_bin("smiley").unwrap();
-
     cmd.arg(filename);
+
     cmd.assert()
         .failure()
         .stderr(predicate::str::contains(format!(
@@ -43,8 +43,8 @@ fn run_with_invalid_src_file_extension() {
     file.write_str("").unwrap();
 
     let mut cmd = Command::cargo_bin("smiley").unwrap();
-
     cmd.arg(file.path());
+
     cmd.assert()
         .failure()
         .stderr(predicate::str::contains("Invalid extension"));
@@ -53,10 +53,16 @@ fn run_with_invalid_src_file_extension() {
 #[test]
 fn run_with_inconsistent_indentations() {
     let file = NamedTempFile::new("inconsistent.smly").unwrap();
-    file.write_str("foo\n  bar\n\tbaz").unwrap();
-    let mut cmd = Command::cargo_bin("smiley").unwrap();
+    file.write_str(indoc! {"
+        foo
+            bar
+        \tbaz
+    "})
+        .unwrap();
 
+    let mut cmd = Command::cargo_bin("smiley").unwrap();
     cmd.arg(file.path());
+
     cmd.assert()
         .failure()
         .stderr(predicate::str::contains("Inconsistent indentation"));

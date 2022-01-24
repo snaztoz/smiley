@@ -1,4 +1,5 @@
 use crate::preprocessor::line::{Col, Row};
+use indoc::indoc;
 use log::error;
 use std::{fs, path::Path};
 
@@ -18,7 +19,7 @@ pub fn report(file: &Path, row: Row, col: Col, message: &str) {
         line.escape_default()
     );
 
-    error!("{}\n\n\t{}", message, err_report);
+    error!("{}\n\t{}", message, err_report);
 }
 
 pub fn report_indentation_error(file: &Path, row: Row, col: Col) {
@@ -26,7 +27,9 @@ pub fn report_indentation_error(file: &Path, row: Row, col: Col) {
         file,
         row,
         col,
-        "Inconsistent indentation: Smiley src files should only use either \
-        space\n\tor tab as indentation character, but not both",
+        indoc! {"
+            Inconsistent indentation: Smiley files should only use either
+            \tspace or tab as indentation character, but never both
+        "},
     );
 }
