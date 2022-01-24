@@ -8,7 +8,6 @@ description = "A (yet-another) simple CSS preprocessor"
 readme = "README.md"
 repository = "https://github.com/snaztoz/smiley"
 license = "BSD-3-Clause"
-license-file = "LICENSE"
 keywords = ["CSS", "preprocessor"]
 categories = ["command-line-utilities", "compilers"]
 
