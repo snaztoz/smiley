@@ -51,6 +51,28 @@ fn run_with_invalid_src_file_extension() {
 }
 
 #[test]
+fn run_with_expected_indentations() {
+    let file = NamedTempFile::new("indentation.smly").unwrap();
+    file.write_str(indoc! {"
+        abc
+            def
+                ghi
+                jkl
+            mno
+        pqr
+                stu
+                vwx
+                        yz
+    "})
+        .unwrap();
+
+    let mut cmd = Command::cargo_bin("smiley").unwrap();
+    cmd.arg(file.path());
+
+    cmd.assert().success();
+}
+
+#[test]
 fn run_with_inconsistent_indentations() {
     let file = NamedTempFile::new("inconsistent.smly").unwrap();
     file.write_str(indoc! {"
