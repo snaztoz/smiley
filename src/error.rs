@@ -1,4 +1,7 @@
-use crate::preprocessor::line::{Col, Row};
+use crate::preprocessor::{
+    indentation::ErrorKind as IndentationErrorKind,
+    line::{Col, Row},
+};
 use indoc::indoc;
 use log::error;
 use std::{fs, path::Path};
@@ -22,14 +25,16 @@ pub fn report(file: &Path, row: Row, col: Col, message: &str) {
     error!("{}\n\t{}", message, err_report);
 }
 
-pub fn report_indentation_error(file: &Path, row: Row, col: Col) {
-    report(
-        file,
-        row,
-        col,
-        indoc! {"
+pub fn report_indentation_error(file: &Path, kind: IndentationErrorKind, row: Row, col: Col) {
+    let msg = match kind {
+        IndentationErrorKind::InconsistentIndentation => indoc! {"
             Inconsistent indentation: Smiley files should only use either
             \tspace or tab as indentation character, but never both
         "},
-    );
+        IndentationErrorKind::UnexpectedIndentation => indoc! {"
+            Unexpected indentation
+        "},
+    };
+
+    report(file, row, col, msg);
 }

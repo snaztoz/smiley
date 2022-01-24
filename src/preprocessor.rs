@@ -1,12 +1,12 @@
 use crate::error;
-use indentation::{Checker as IndentationChecker, Indentation};
+use indentation::{Checker as IndentationChecker, ErrorKind as IndentationErrorKind, Indentation};
 use itertools::Itertools;
 use line::{Content as LineContent, Line};
 use log::{debug, info};
 use std::{fs, path::PathBuf, process};
 
 pub mod builder;
-mod indentation;
+pub mod indentation;
 pub mod line;
 
 #[derive(Default)]
@@ -53,7 +53,12 @@ impl Preprocessor {
 
                 Err(col) => {
                     let src = self.src.as_deref().unwrap();
-                    error::report_indentation_error(src, i + 1, col);
+                    error::report_indentation_error(
+                        src,
+                        IndentationErrorKind::InconsistentIndentation,
+                        i + 1,
+                        col,
+                    );
                     process::exit(1);
                 }
             })
@@ -70,9 +75,11 @@ impl Preprocessor {
     }
 
     fn validate_indentation(&mut self, line: &Line) {
-        if let Err((row, col)) = self.indent_checker.validate(line) {
+        if let Err(err) = self.indent_checker.validate(line) {
             let src = self.src.as_deref().unwrap();
-            error::report_indentation_error(src, row, col);
+            let (kind, (row, col)) = err;
+
+            error::report_indentation_error(src, kind, row, col);
             process::exit(1);
         }
     }

@@ -4,6 +4,7 @@ use std::cmp::Ordering;
 
 pub type IndentationMode = Option<(Indentation, IndentationLevel)>;
 pub type IndentationLevel = usize;
+type Error = (ErrorKind, (Row, Col));
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Indentation {
@@ -51,32 +52,28 @@ pub struct Checker {
 }
 
 impl Checker {
-    pub fn validate(&mut self, line: &Line) -> Result<(), (Row, Col)> {
+    pub fn validate(&mut self, line: &Line) -> Result<(), Error> {
         if line.indentation_mode.is_none() {
             self.set_stack_level_to_zero();
             return Ok(());
         }
 
-        let (indent, level) = line.indentation_mode.unwrap();
+        self.handle_indentation(line)?;
+        self.handle_indentation_level(line)?;
 
-        self.handle_indentation(&indent)
-            .and_then(|_| self.handle_indentation_level(level))
-            .map_err(|_| (line.row, 0))
+        Ok(())
     }
 
-    fn handle_indentation(&mut self, indent: &Indentation) -> Result<(), ()> {
-        match self.used_type {
-            Some(_) => self.validate_indentation_type(indent),
-            None => {
-                self.set_indentation_mode(indent);
-                Ok(())
-            }
+    fn handle_indentation(&mut self, line: &Line) -> Result<(), Error> {
+        let (indent, _) = line.indentation_mode.unwrap();
+
+        if self.used_type.is_none() {
+            self.set_indentation_mode(&indent);
+            return Ok(());
         }
-    }
 
-    fn validate_indentation_type(&self, indent: &Indentation) -> Result<(), ()> {
-        if indent != self.used_type.as_ref().unwrap() {
-            Err(())
+        if indent != *self.used_type.as_ref().unwrap() {
+            Err((ErrorKind::InconsistentIndentation, (line.row, 0)))
         } else {
             Ok(())
         }
@@ -92,17 +89,20 @@ impl Checker {
         self.used_type = Some(*indent);
     }
 
-    fn handle_indentation_level(&mut self, level: IndentationLevel) -> Result<(), ()> {
+    fn handle_indentation_level(&mut self, line: &Line) -> Result<(), Error> {
         // this will prevent non-zero indentation at first
         // non-empty line
         if self.indentation_level_stack.is_empty() {
-            return Err(());
+            return Err((ErrorKind::UnexpectedIndentation, (line.row, 0)));
         }
 
+        let (_, level) = line.indentation_mode.unwrap();
         let &top_level = self.indentation_level_stack.last().unwrap();
 
         if level < top_level {
-            return self.pop_stack(level);
+            return self
+                .pop_stack(level)
+                .map_err(|_| (ErrorKind::UnexpectedIndentation, (line.row, level)));
         }
 
         if level > top_level {
@@ -118,7 +118,7 @@ impl Checker {
 
             match new_level.cmp(&top) {
                 Ordering::Equal => return Ok(()),
-                Ordering::Greater => return Err(()),
+                Ordering::Greater => break Err(()),
                 _ => (),
             }
         }
@@ -128,6 +128,11 @@ impl Checker {
         self.indentation_level_stack.clear();
         self.indentation_level_stack.push(0);
     }
+}
+
+pub enum ErrorKind {
+    InconsistentIndentation,
+    UnexpectedIndentation,
 }
 
 #[cfg(test)]

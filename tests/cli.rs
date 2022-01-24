@@ -91,6 +91,8 @@ fn run_with_unexpected_indentations() {
         let mut cmd = Command::cargo_bin("smiley").unwrap();
         cmd.arg(file.path());
 
-        cmd.assert().failure();
+        cmd.assert()
+            .failure()
+            .stderr(predicate::str::contains("Unexpected indentation"));
     }
 }
