@@ -38,7 +38,7 @@ impl Preprocessor {
         let file_path = self.src.as_ref().unwrap();
         let file_content = fs::read_to_string(file_path).unwrap();
 
-        let mut lines = file_content
+        file_content
             .lines()
             .enumerate()
             .filter(|(_, line)| !line.trim().is_empty())
@@ -62,16 +62,8 @@ impl Preprocessor {
                     process::exit(1);
                 }
             })
-            .collect::<Vec<_>>();
-
-        // Append EOF
-        lines.push(Line {
-            row: usize::MAX, // doesn't really matter
-            content: LineContent::Eof,
-            indentation_mode: None,
-        });
-
-        lines
+            .chain([Line::eof()])
+            .collect::<Vec<_>>()
     }
 
     fn validate_indentation(&mut self, line: &Line) {

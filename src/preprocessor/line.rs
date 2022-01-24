@@ -22,6 +22,14 @@ impl Line {
         }
     }
 
+    pub fn eof() -> Self {
+        Self {
+            row: usize::MAX,
+            content: Content::Eof,
+            indentation_mode: None,
+        }
+    }
+
     pub fn get_indentation_level(&self) -> Option<usize> {
         self.indentation_mode.map(|(_, level)| level)
     }
@@ -70,7 +78,7 @@ mod tests {
             helpers::line_from("h", 0),
             helpers::line_from("i", 2),
             helpers::line_from("j", 2),
-            helpers::eof(),
+            Line::eof(),
         ];
 
         let expected_types = vec![
@@ -109,14 +117,6 @@ mod tests {
                 row: 1, // doesn't matter
                 content: Content::Value(String::from(s)),
                 indentation_mode,
-            }
-        }
-
-        pub fn eof() -> Line {
-            Line {
-                row: usize::MAX,
-                content: Content::Eof,
-                indentation_mode: None,
             }
         }
     }
