@@ -17,6 +17,7 @@ mod tests {
             ".foo.bar.bat",
             "foo.bar[ baz |= 'string' i ].abc",
             "[foo=bar i][ baz ~= \"bat\" S]",
+            ".foo-bar.bat[abc = ghi]",
         ];
 
         for case in &cases {

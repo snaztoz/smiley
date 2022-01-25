@@ -37,7 +37,7 @@ attr_op = @{
 }
 
 ident = @{
-    (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")*
+    (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_" | "-")*
 }
 
 string = _{
