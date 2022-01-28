@@ -1,50 +1,65 @@
-selector = {
-    SOI ~
-    basic_selector ~
-    EOI
-}
+selector =
+    {
+        SOI ~
+        basic_selector ~
+        EOI
+    }
 
-basic_selector = @{
-    element_name ~ (id | class | attr)*
-    | (id | class | attr)+
-}
+basic_selector =
+    @{
+        element_name ~ (id | class | attr)*
+        | (id | class | attr)+
+    }
 
-element_name = {
-    ident | "*"
-}
+element_name =
+    {
+        ident | "*"
+    }
 
-id = @{
-    "#" ~ ident
-}
+id =
+    @{
+        "#" ~ ident
+    }
 
-class = @{
-    "." ~ ident
-}
+class =
+    @{
+        "." ~ ident
+    }
 
 // implicit whitespaces won't be permitted here because
 // the rule inherit atomicity from basic_selector
-attr = _{
-    "[" ~                           WS* ~
-    ident ~                         WS* ~
-    attr_op ~                       WS* ~
-    (ident | string) ~              WS* ~
-    (("i" | "I") | ("s" | "S"))? ~  WS* ~
-    "]"
-}
+attr = 
+    _{
+        "[" ~                           WS* ~
+        ident ~                         WS* ~
+        attr_op ~                       WS* ~
+        (ident | string) ~              WS* ~
+        (("i" | "I") | ("s" | "S"))? ~  WS* ~
+        "]"
+    }
 
-attr_op = @{
-    ("~" | "|" | "^" | "$" | "*")? ~ "="
-}
+attr_op =
+    @{
+        ("~" | "|" | "^" | "$" | "*")? ~ "="
+    }
 
-ident = @{
-    (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_" | "-")*
-}
+ident =
+    @{
+        (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_" | "-")*
+    }
 
-string = _{
-    ("\"" ~ (!"\"" ~ ANY)* ~ "\"")
-    | ("'" ~ (!"'" ~ ANY)* ~ "'")
-}
+string =
+    _{
+        ("\"" ~ (!"\"" ~ ANY)* ~ "\"")
+        | ("'" ~ (!"'" ~ ANY)* ~ "'")
+    }
 
-WS = { " " | "\t" }
+WS =
+    {
+        " " | "\t"
+    }
 
-WHITESPACE = _{ WS }
+WHITESPACE =
+    _{
+        WS
+    }
