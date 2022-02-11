@@ -43,6 +43,44 @@ attr_op =
         ("~" | "|" | "^" | "$" | "*")? ~ "="
     }
 
+// I want to create a silent rule using (_), but for some
+// reason it still producing inner tokens, so I change it
+// to using (@) and then add the possible whitespaces token
+// explicitly
+declaration =
+    @{
+        SOI ~           WS*~
+        property ~      WS*~
+        ":" ~           WS*~
+        expr ~          WS*~
+        important? ~    WS*~
+        EOI
+    }
+
+property =
+    @{
+        ident
+    }
+
+expr =
+    @{
+        term
+    }
+
+term =
+    {
+        (("+" | "-")? ~ (
+            dimension
+            | percentage
+            | number
+        ))
+    }
+
+important =
+    {
+        "!" ~ WS* ~ ^"important"
+    }
+
 ident =
     @{
         (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_" | "-")*
@@ -52,6 +90,30 @@ string =
     _{
         ("\"" ~ (!"\"" ~ ANY)* ~ "\"")
         | ("'" ~ (!"'" ~ ANY)* ~ "'")
+    }
+
+number =
+    @{
+        ASCII_DIGIT+
+        | (ASCII_DIGIT* ~ "." ~ ASCII_DIGIT+)
+    }
+
+percentage =
+    @{
+        number ~ "%"
+    }
+
+dimension =
+    @{
+        number ~ (
+            ^"px" | ^"cm" | ^"mm" | ^"in" |
+            ^"pt" | ^"pc" | ^"pq" | ^"q" |
+            ^"em" | ^"ex" | ^"ch" | ^"rem" |
+            ^"vw" | ^"vh" | ^"vmin" | ^"vmax" |
+            ^"ms" | ^"s" | ^"hz" | ^"khz" |
+            ^"dpi" | ^"dpcm" | ^"dppx" | ^"deg" |
+            ^"rad" | ^"grad" | ^"turn"
+        )
     }
 
 WS =

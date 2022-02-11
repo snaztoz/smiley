@@ -36,4 +36,27 @@ mod tests {
             };
         }
     }
+
+    #[test]
+    fn property_parsing() {
+        let cases = [
+            "max-width: 100px",
+            "max-width : 100px",
+            "min-width:100VW",
+            "font-size: 16pt ! important",
+        ];
+
+        for case in &cases {
+            let eoi_pos = case.len();
+
+            pest::parses_to! {
+                parser: SmileyParser,
+                input: case,
+                rule: Rule::declaration,
+                tokens: [
+                    declaration(0, eoi_pos),
+                ]
+            };
+        }
+    }
 }
