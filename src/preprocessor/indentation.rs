@@ -13,7 +13,7 @@ pub enum Indentation {
 }
 
 impl Indentation {
-    pub fn check_mode(line: &str) -> Result<IndentationMode, Col> {
+    pub fn mode_of(line: &str) -> Result<IndentationMode, Col> {
         if line.is_empty() {
             return Ok(None);
         }
@@ -152,7 +152,7 @@ mod tests {
 
         for (i, (line, expected)) in cases.iter().enumerate() {
             assert_eq!(
-                Indentation::check_mode(line),
+                Indentation::mode_of(line),
                 *expected,
                 "failed at test case {}",
                 i + 1

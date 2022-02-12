@@ -12,7 +12,7 @@ pub struct Line {
 
 impl Line {
     pub fn try_from(line: &str, row: Row) -> Result<Self, Col> {
-        Indentation::check_mode(line).map(|mode| {
+        Indentation::mode_of(line).map(|mode| {
             Self {
                 // remove indentations, and put the information
                 // inside indentation_mode instead
