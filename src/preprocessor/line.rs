@@ -1,7 +1,10 @@
-use super::indentation::{Indentation, IndentationMode};
+use super::indentation::IndentationMode;
 
 pub type Row = usize;
 pub type Col = usize;
+type Pos = (Row, Col);
+
+pub mod builder;
 
 #[derive(Clone, Debug)]
 pub struct Line {
@@ -11,18 +14,6 @@ pub struct Line {
 }
 
 impl Line {
-    pub fn try_from(line: &str, row: Row) -> Result<Self, Col> {
-        Indentation::mode_of(line).map(|mode| {
-            Self {
-                // remove indentations, and put the information
-                // inside indentation_mode instead
-                content: Content::Value(line.trim().to_string()),
-                indentation_mode: mode,
-                row,
-            }
-        })
-    }
-
     pub fn determine_kind(line: &Line, next_line: &Line) -> CssLineKind {
         let level = line.get_indentation_level();
         let next_level = next_line.get_indentation_level();

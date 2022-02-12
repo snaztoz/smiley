@@ -1,7 +1,7 @@
 use crate::error;
 use indentation::{ErrorKind as IndentationErrorKind, Validator as IndentationValidator};
 use itertools::Itertools;
-use line::Line;
+use line::{builder::Builder as LineBuilder, Line};
 use log::{debug, info};
 use std::{fs, path::PathBuf, process};
 
@@ -38,24 +38,25 @@ impl Preprocessor {
         let file_path = self.src.as_ref().unwrap();
         let file_content = fs::read_to_string(file_path).unwrap();
 
+        let mut line_builder = LineBuilder::default();
+
         file_content
             .lines()
-            .enumerate()
-            .filter(|(_, line)| !line.trim().is_empty())
-            .map(|(i, line)| {
-                let row = i + 1;
-
-                Line::try_from(line, row).unwrap_or_else(|col| {
-                    let src = self.src.as_deref().unwrap();
-                    error::report_indentation_error(
-                        src,
-                        IndentationErrorKind::InconsistentIndentation,
-                        row,
-                        col,
-                    );
-                    process::exit(1);
-                })
+            .map(|raw_line| {
+                line_builder
+                    .build_line_from(raw_line)
+                    .unwrap_or_else(|(row, col)| {
+                        let src = self.src.as_deref().unwrap();
+                        error::report_indentation_error(
+                            src,
+                            IndentationErrorKind::InconsistentIndentation,
+                            row,
+                            col,
+                        );
+                        process::exit(1);
+                    })
             })
+            .flatten()
             .chain([Line::eof()])
             .collect::<Vec<_>>()
     }
