@@ -1,12 +1,10 @@
 use indentation::Indentation;
-
-pub type Row = usize;
-pub type Col = usize;
-type Pos = (Row, Col);
+use position::Row;
 
 pub mod builder;
 pub mod error;
 pub mod indentation;
+pub mod position;
 
 #[derive(Clone, Debug)]
 pub struct Line {

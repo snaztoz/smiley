@@ -1,8 +1,8 @@
-use super::Pos;
+use super::position::Position;
 
 pub struct Error {
     pub kind: ErrorKind,
-    pub pos: Pos,
+    pub pos: Position,
 }
 
 pub enum ErrorKind {

@@ -1,7 +1,8 @@
 use super::{
     error::{Error as LineError, ErrorKind as LineErrorKind},
     indentation::Indentation,
-    Content as LineContent, Line, Row,
+    position::{Position, Row},
+    Content as LineContent, Line,
 };
 
 #[derive(Default)]
@@ -28,7 +29,7 @@ impl Builder {
             })
             .map_err(|col| LineError {
                 kind: LineErrorKind::InconsistentIndentation,
-                pos: (self.row_count, col),
+                pos: Position::at(self.row_count, col),
             })?;
 
         Ok(Some(line))

@@ -1,4 +1,4 @@
-use super::Col;
+use super::position::Col;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Indentation {
