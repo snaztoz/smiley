@@ -4,7 +4,6 @@ use log::{debug, info};
 use std::{fs, path::PathBuf, process};
 
 pub mod builder;
-pub mod indentation;
 pub mod line;
 
 #[derive(Default)]

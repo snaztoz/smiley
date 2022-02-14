@@ -1,4 +1,4 @@
-use super::indentation::IndentationMode;
+use indentation::Indentation;
 
 pub type Row = usize;
 pub type Col = usize;
@@ -6,18 +6,19 @@ type Pos = (Row, Col);
 
 pub mod builder;
 pub mod error;
+pub mod indentation;
 
 #[derive(Clone, Debug)]
 pub struct Line {
     pub row: Row,
     pub content: Content,
-    pub indentation_mode: IndentationMode,
+    pub indentation: Indentation,
 }
 
 impl Line {
     pub fn determine_kind(line: &Line, next_line: &Line) -> CssLineKind {
-        let level = line.get_indentation_level();
-        let next_level = next_line.get_indentation_level();
+        let level = line.indentation.depth;
+        let next_level = next_line.indentation.depth;
 
         if level < next_level {
             CssLineKind::Selector
@@ -30,12 +31,8 @@ impl Line {
         Self {
             row: usize::MAX,
             content: Content::Eof,
-            indentation_mode: None,
+            indentation: Indentation::none(),
         }
-    }
-
-    fn get_indentation_level(&self) -> Option<usize> {
-        self.indentation_mode.map(|(_, level)| level)
     }
 }
 
@@ -109,18 +106,18 @@ mod tests {
 
     mod helpers {
         use super::*;
-        use crate::preprocessor::indentation::{Indentation, IndentationLevel};
+        use crate::preprocessor::line::indentation::{Indentation, IndentationKind};
 
-        pub fn line_from(s: &str, level: IndentationLevel) -> Line {
-            let indentation_mode = match level {
-                0 => None,
-                _ => Some((Indentation::Space, level)),
+        pub fn line_from(s: &str, depth: usize) -> Line {
+            let kind = match depth {
+                0 => IndentationKind::None,
+                _ => IndentationKind::Space,
             };
 
             Line {
                 row: 1, // doesn't matter
                 content: Content::Value(String::from(s)),
-                indentation_mode,
+                indentation: Indentation { kind, depth },
             }
         }
     }

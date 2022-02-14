@@ -1,8 +1,8 @@
 use super::{
     error::{Error as LineError, ErrorKind as LineErrorKind},
+    indentation::Indentation,
     Content as LineContent, Line, Row,
 };
-use crate::preprocessor::indentation::Indentation;
 
 #[derive(Default)]
 pub struct Builder {
@@ -17,13 +17,13 @@ impl Builder {
             return Ok(None);
         }
 
-        let indent_mode = Indentation::mode_of(raw_line);
-        let line = indent_mode
-            .map(|mode| Line {
+        let indent = Indentation::of_line(raw_line);
+        let line = indent
+            .map(|indent| Line {
                 // remove indentations, and put the information
                 // inside indentation_mode instead
                 content: LineContent::Value(raw_line.trim().to_string()),
-                indentation_mode: mode,
+                indentation: indent,
                 row: self.row_count,
             })
             .map_err(|col| LineError {
