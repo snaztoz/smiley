@@ -1,4 +1,7 @@
-use super::{Content as LineContent, Line, Pos, Row};
+use super::{
+    error::{Error as LineError, ErrorKind as LineErrorKind},
+    Content as LineContent, Line, Row,
+};
 use crate::preprocessor::indentation::Indentation;
 
 #[derive(Default)]
@@ -7,7 +10,7 @@ pub struct Builder {
 }
 
 impl Builder {
-    pub fn build_line_from(&mut self, raw_line: &str) -> Result<Option<Line>, Pos> {
+    pub fn build_line_from(&mut self, raw_line: &str) -> Result<Option<Line>, LineError> {
         self.row_count += 1;
 
         if raw_line.trim().is_empty() {
@@ -23,7 +26,10 @@ impl Builder {
                 indentation_mode: mode,
                 row: self.row_count,
             })
-            .map_err(|col| (self.row_count, col))?;
+            .map_err(|col| LineError {
+                kind: LineErrorKind::InconsistentIndentation,
+                pos: (self.row_count, col),
+            })?;
 
         Ok(Some(line))
     }

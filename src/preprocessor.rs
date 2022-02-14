@@ -1,6 +1,4 @@
 use crate::error;
-use indentation::{ErrorKind as IndentationErrorKind, Validator as IndentationValidator};
-use itertools::Itertools;
 use line::{builder::Builder as LineBuilder, Line};
 use log::{debug, info};
 use std::{fs, path::PathBuf, process};
@@ -14,8 +12,6 @@ pub struct Preprocessor {
     src: Option<PathBuf>,
     out: Option<PathBuf>,
     is_watch_mode: bool,
-
-    indent_validator: IndentationValidator,
 }
 
 impl Preprocessor {
@@ -25,11 +21,7 @@ impl Preprocessor {
 
         info!("Running the preprocessor");
 
-        let lines = self.read_src_file_lines();
-
-        for (line, _) in lines.iter().tuple_windows::<(&Line, &Line)>() {
-            self.validate_indentation(line);
-        }
+        let _lines = self.read_src_file_lines();
     }
 
     fn read_src_file_lines(&self) -> Vec<Line> {
@@ -45,11 +37,12 @@ impl Preprocessor {
             .map(|raw_line| {
                 line_builder
                     .build_line_from(raw_line)
-                    .unwrap_or_else(|(row, col)| {
+                    .unwrap_or_else(|err| {
                         let src = self.src.as_deref().unwrap();
-                        error::report_indentation_error(
+                        let (row, col) = err.pos;
+                        error::report_line_building_error(
                             src,
-                            IndentationErrorKind::InconsistentIndentation,
+                            err.kind,
                             row,
                             col,
                         );
@@ -59,15 +52,5 @@ impl Preprocessor {
             .flatten()
             .chain([Line::eof()])
             .collect::<Vec<_>>()
-    }
-
-    fn validate_indentation(&mut self, line: &Line) {
-        if let Err(err) = self.indent_validator.validate(line) {
-            let src = self.src.as_deref().unwrap();
-            let (kind, (row, col)) = err;
-
-            error::report_indentation_error(src, kind, row, col);
-            process::exit(1);
-        }
     }
 }

@@ -5,6 +5,7 @@ pub type Col = usize;
 type Pos = (Row, Col);
 
 pub mod builder;
+pub mod error;
 
 #[derive(Clone, Debug)]
 pub struct Line {

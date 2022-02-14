@@ -1,6 +1,5 @@
 use crate::preprocessor::{
-    indentation::ErrorKind as IndentationErrorKind,
-    line::{Col, Row},
+    line::{error::ErrorKind as LineErrorKind, Col, Row},
 };
 use indoc::{formatdoc, indoc};
 use log::error;
@@ -23,17 +22,19 @@ pub fn report(file: &Path, row: Row, col: Col, message: &str) {
     error!("{message}\n{err_report}");
 }
 
-pub fn report_indentation_error(file: &Path, kind: IndentationErrorKind, row: Row, col: Col) {
+pub fn report_line_building_error(file: &Path, kind: LineErrorKind, row: Row, col: Col) {
     let msg = match kind {
-        IndentationErrorKind::InconsistentIndentation => indoc! {"
+        LineErrorKind::InconsistentIndentation => indoc! {"
             Inconsistent indentation
 
             Smiley files should only use either space or tab as
             indentation character, but never both
         "},
-        IndentationErrorKind::UnexpectedIndentation => indoc! {"
+        LineErrorKind::UnexpectedIndentation => indoc! {"
             Unexpected indentation
         "},
+
+        _ => panic!("unexpected error kind"),
     };
 
     report(file, row, col, msg);
