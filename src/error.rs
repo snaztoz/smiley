@@ -1,6 +1,4 @@
-use crate::preprocessor::{
-    line::{error::ErrorKind as LineErrorKind, Col, Row},
-};
+use crate::preprocessor::line::{error::ErrorKind as LineErrorKind, Col, Row};
 use indoc::{formatdoc, indoc};
 use log::error;
 use std::{fs, path::Path};
