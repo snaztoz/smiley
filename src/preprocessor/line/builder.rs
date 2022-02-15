@@ -70,6 +70,8 @@ impl IndentationHandler {
 
     fn handle_depth(&mut self, depth: usize) -> Result<(), LineErrorKind> {
         if self.stack.is_empty() {
+            // this will prevent the first non-empty line to
+            // have indentation(s)
             if depth == 0 {
                 self.stack.push(0);
             } else {
