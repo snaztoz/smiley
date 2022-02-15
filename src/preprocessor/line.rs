@@ -1,5 +1,4 @@
 use indentation::Indentation;
-use position::Row;
 
 pub mod builder;
 pub mod error;
@@ -8,7 +7,6 @@ pub mod position;
 
 #[derive(Clone, Debug)]
 pub struct Line {
-    pub row: Row,
     pub content: Content,
     pub indentation: Indentation,
 }
@@ -27,7 +25,6 @@ impl Line {
 
     pub fn eof() -> Self {
         Self {
-            row: usize::MAX,
             content: Content::Eof,
             indentation: Indentation::none(),
         }
@@ -113,7 +110,6 @@ mod tests {
             };
 
             Line {
-                row: 1, // doesn't matter
                 content: Content::Value(String::from(s)),
                 indentation: Indentation { kind, depth },
             }

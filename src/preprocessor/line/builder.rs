@@ -36,7 +36,6 @@ impl Builder {
             // inside indentation_mode instead
             content: LineContent::Value(raw_line.trim().to_string()),
             indentation: indent,
-            row: self.row_count,
         }))
     }
 }
