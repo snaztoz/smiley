@@ -31,8 +31,6 @@ pub fn report_line_building_error(file: &Path, kind: LineErrorKind, pos: Positio
         LineErrorKind::UnexpectedIndentation => indoc! {"
             Unexpected indentation
         "},
-
-        _ => panic!("unexpected error kind"),
     };
 
     report(file, pos, msg);
