@@ -12,14 +12,14 @@ pub struct Line {
 }
 
 impl Line {
-    pub fn determine_kind(line: &Line, next_line: &Line) -> CssLineKind {
+    pub fn determine_kind(line: &Line, next_line: &Line) -> LineKind {
         let level = line.indentation.depth;
         let next_level = next_line.indentation.depth;
 
         if level < next_level {
-            CssLineKind::Selector
+            LineKind::Selector
         } else {
-            CssLineKind::Property
+            LineKind::Declaration
         }
     }
 
@@ -38,9 +38,9 @@ pub enum Content {
 }
 
 #[derive(Debug, PartialEq)]
-pub enum CssLineKind {
+pub enum LineKind {
     Selector,
-    Property,
+    Declaration,
 }
 
 #[cfg(test)]
@@ -78,16 +78,16 @@ mod tests {
         ];
 
         let expected_types = vec![
-            CssLineKind::Selector,
-            CssLineKind::Selector,
-            CssLineKind::Property,
-            CssLineKind::Property,
-            CssLineKind::Selector,
-            CssLineKind::Property,
-            CssLineKind::Property,
-            CssLineKind::Selector,
-            CssLineKind::Property,
-            CssLineKind::Property,
+            LineKind::Selector,
+            LineKind::Selector,
+            LineKind::Declaration,
+            LineKind::Declaration,
+            LineKind::Selector,
+            LineKind::Declaration,
+            LineKind::Declaration,
+            LineKind::Selector,
+            LineKind::Declaration,
+            LineKind::Declaration,
         ];
 
         let pass = lines
