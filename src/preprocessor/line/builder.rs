@@ -4,6 +4,7 @@ use super::{
     position::{Position, Row},
     Content as LineContent, Line,
 };
+use log::debug;
 
 #[derive(Default)]
 pub struct Builder {
@@ -56,7 +57,7 @@ impl IndentationHandler {
 
     fn handle_kind(&mut self, indent_kind: IndentationKind) -> Result<(), LineErrorKind> {
         if self.used_kind.is_none() && indent_kind != IndentationKind::None {
-            self.used_kind = Some(indent_kind);
+            self.set_used_indentation_kind(indent_kind);
             return Ok(());
         }
 
@@ -97,6 +98,18 @@ impl IndentationHandler {
 
             break Ok(());
         }
+    }
+
+    fn set_used_indentation_kind(&mut self, indent_kind: IndentationKind) {
+        assert!(indent_kind != IndentationKind::None);
+
+        if indent_kind == IndentationKind::Space {
+            debug!("Setting used indentation type to space");
+        } else {
+            debug!("Setting used indentation type to tab");
+        }
+
+        self.used_kind = Some(indent_kind);
     }
 }
 
