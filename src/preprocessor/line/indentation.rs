@@ -1,6 +1,6 @@
 use super::position::Col;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Indentation {
     pub kind: IndentationKind,
     pub depth: usize,
