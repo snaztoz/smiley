@@ -38,7 +38,7 @@ impl Preprocessor {
                     .build_line_from(raw_line)
                     .unwrap_or_else(|err| {
                         let src = self.src.as_deref().unwrap();
-                        error::report_line_building_error(src, err.kind, err.pos);
+                        error::report_line_building_error(src, err);
                         process::exit(1);
                     })
             })

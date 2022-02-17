@@ -1,4 +1,7 @@
-use crate::preprocessor::line::{error::ErrorKind as LineErrorKind, position::Position};
+use crate::preprocessor::line::{
+    error::{Error as LineError, ErrorKind as LineErrorKind},
+    position::Position,
+};
 use indoc::{formatdoc, indoc};
 use log::error;
 use std::{fs, path::Path};
@@ -20,8 +23,8 @@ pub fn report(file: &Path, pos: Position, message: &str) {
     error!("{message}\n{err_report}");
 }
 
-pub fn report_line_building_error(file: &Path, kind: LineErrorKind, pos: Position) {
-    let msg = match kind {
+pub fn report_line_building_error(file: &Path, err: LineError) {
+    let msg = match err.kind {
         LineErrorKind::InconsistentIndentation => indoc! {"
             Inconsistent indentation
 
@@ -33,5 +36,5 @@ pub fn report_line_building_error(file: &Path, kind: LineErrorKind, pos: Positio
         "},
     };
 
-    report(file, pos, msg);
+    report(file, err.pos, msg);
 }
