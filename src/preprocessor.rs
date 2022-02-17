@@ -1,4 +1,5 @@
 use crate::error;
+use itertools::Itertools;
 use line::{builder::Builder as LineBuilder, Line, NumberedLine};
 use log::{debug, info};
 use std::{fs, path::PathBuf, process};
@@ -20,7 +21,13 @@ impl Preprocessor {
 
         info!("Running the preprocessor");
 
-        let _lines = self.read_src_file_lines();
+        let lines = self.read_src_file_lines();
+
+        for (line, next) in lines.iter().tuple_windows() {
+            let (_, line) = line;
+            let (_, next) = next;
+            let _kind = line::determine_kind(line, next);
+        }
     }
 
     fn read_src_file_lines(&self) -> Vec<NumberedLine> {
