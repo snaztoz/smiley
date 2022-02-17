@@ -1,5 +1,5 @@
 use crate::error;
-use line::{builder::Builder as LineBuilder, Line};
+use line::{builder::Builder as LineBuilder, Line, NumberedLine};
 use log::{debug, info};
 use std::{fs, path::PathBuf, process};
 
@@ -23,7 +23,7 @@ impl Preprocessor {
         let _lines = self.read_src_file_lines();
     }
 
-    fn read_src_file_lines(&self) -> Vec<Line> {
+    fn read_src_file_lines(&self) -> Vec<NumberedLine> {
         debug!("Reading src file content");
 
         let file_path = self.src.as_ref().unwrap();
@@ -43,7 +43,7 @@ impl Preprocessor {
                     })
             })
             .flatten()
-            .chain([Line::eof()])
+            .chain([(0, Line::eof())])
             .collect::<Vec<_>>()
     }
 }

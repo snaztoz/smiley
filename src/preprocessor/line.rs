@@ -1,9 +1,12 @@
 use indentation::Indentation;
+use position::Row;
 
 pub mod builder;
 pub mod error;
 pub mod indentation;
 pub mod position;
+
+pub type NumberedLine = (Row, Line);
 
 #[derive(Clone, Debug)]
 pub struct Line {

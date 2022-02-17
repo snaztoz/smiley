@@ -2,7 +2,7 @@ use super::{
     error::{Error as LineError, ErrorKind as LineErrorKind},
     indentation::{Indentation, IndentationKind},
     position::{Position, Row},
-    Content as LineContent, Line,
+    Content as LineContent, Line, NumberedLine,
 };
 use log::debug;
 
@@ -13,7 +13,7 @@ pub struct Builder {
 }
 
 impl Builder {
-    pub fn build_line_from(&mut self, raw_line: &str) -> Result<Option<Line>, LineError> {
+    pub fn build_line_from(&mut self, raw_line: &str) -> Result<Option<NumberedLine>, LineError> {
         self.row_count += 1;
 
         if raw_line.trim().is_empty() {
@@ -32,12 +32,15 @@ impl Builder {
                 pos: Position::at(self.row_count, 0),
             })?;
 
-        Ok(Some(Line {
-            // remove indentations, and put the information
-            // inside indentation_mode instead
-            content: LineContent::Value(raw_line.trim().to_string()),
-            indentation: indent,
-        }))
+        Ok(Some((
+            self.row_count,
+            Line {
+                // remove indentations, and put the information
+                // inside indentation_mode instead
+                content: LineContent::Value(raw_line.trim().to_string()),
+                indentation: indent,
+            },
+        )))
     }
 }
 
