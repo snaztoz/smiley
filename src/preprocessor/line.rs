@@ -15,17 +15,6 @@ pub struct Line {
 }
 
 impl Line {
-    pub fn determine_kind(line: &Line, next_line: &Line) -> LineKind {
-        let level = line.indentation.depth;
-        let next_level = next_line.indentation.depth;
-
-        if level < next_level {
-            LineKind::Selector
-        } else {
-            LineKind::Declaration
-        }
-    }
-
     pub fn eof() -> Self {
         Self {
             content: Content::Eof,
@@ -44,6 +33,17 @@ pub enum Content {
 pub enum LineKind {
     Selector,
     Declaration,
+}
+
+pub fn determine_kind(line: &Line, next_line: &Line) -> LineKind {
+    let level = line.indentation.depth;
+    let next_level = next_line.indentation.depth;
+
+    if level < next_level {
+        LineKind::Selector
+    } else {
+        LineKind::Declaration
+    }
 }
 
 #[cfg(test)]
@@ -97,7 +97,7 @@ mod tests {
             .iter()
             .tuple_windows()
             .enumerate()
-            .all(|(i, (line, next))| Line::determine_kind(line, next) == expected_types[i]);
+            .all(|(i, (line, next))| determine_kind(line, next) == expected_types[i]);
 
         assert!(pass);
     }
