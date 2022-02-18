@@ -1,9 +1,9 @@
 use super::{
-    error::{Error as LineError, ErrorKind as LineErrorKind},
     indentation::{Indentation, IndentationKind},
     position::{Position, Row},
     Content as LineContent, Line, NumberedLine,
 };
+use crate::error::{Error, ErrorKind};
 use log::debug;
 
 #[derive(Default)]
@@ -13,21 +13,21 @@ pub struct Builder {
 }
 
 impl Builder {
-    pub fn build_line_from(&mut self, raw_line: &str) -> Result<Option<NumberedLine>, LineError> {
+    pub fn build_line_from(&mut self, raw_line: &str) -> Result<Option<NumberedLine>, Error> {
         self.row_count += 1;
 
         if raw_line.trim().is_empty() {
             return Ok(None);
         }
 
-        let indent = Indentation::of_line(raw_line).map_err(|col| LineError {
-            kind: LineErrorKind::InconsistentIndentation,
+        let indent = Indentation::of_line(raw_line).map_err(|col| Error {
+            kind: ErrorKind::InconsistentIndentation,
             pos: Position::at(self.row_count, col),
         })?;
 
         self.indentation_handler
             .handle(indent)
-            .map_err(|kind| LineError {
+            .map_err(|kind| Error {
                 kind,
                 pos: Position::at(self.row_count, 0),
             })?;
@@ -51,34 +51,34 @@ struct IndentationHandler {
 }
 
 impl IndentationHandler {
-    fn handle(&mut self, indent: Indentation) -> Result<(), LineErrorKind> {
+    fn handle(&mut self, indent: Indentation) -> Result<(), ErrorKind> {
         self.handle_kind(indent.kind)?;
         self.handle_depth(indent.depth)?;
 
         Ok(())
     }
 
-    fn handle_kind(&mut self, indent_kind: IndentationKind) -> Result<(), LineErrorKind> {
+    fn handle_kind(&mut self, indent_kind: IndentationKind) -> Result<(), ErrorKind> {
         if self.used_kind.is_none() && indent_kind != IndentationKind::None {
             self.set_used_indentation_kind(indent_kind);
             return Ok(());
         }
 
         if indent_kind != IndentationKind::None && indent_kind != self.used_kind.unwrap() {
-            return Err(LineErrorKind::InconsistentIndentation);
+            return Err(ErrorKind::InconsistentIndentation);
         }
 
         Ok(())
     }
 
-    fn handle_depth(&mut self, depth: usize) -> Result<(), LineErrorKind> {
+    fn handle_depth(&mut self, depth: usize) -> Result<(), ErrorKind> {
         if self.stack.is_empty() {
             // this will prevent the first non-empty line to
             // have indentation(s)
             if depth == 0 {
                 self.stack.push(0);
             } else {
-                return Err(LineErrorKind::UnexpectedIndentation);
+                return Err(ErrorKind::UnexpectedIndentation);
             }
         }
 
@@ -98,7 +98,7 @@ impl IndentationHandler {
             }
 
             if depth > deepest {
-                break Err(LineErrorKind::UnexpectedIndentation);
+                break Err(ErrorKind::UnexpectedIndentation);
             }
 
             break Ok(());
