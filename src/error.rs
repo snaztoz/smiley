@@ -9,41 +9,48 @@ pub struct Error {
     pub pos: Position,
 }
 
+impl Error {
+    pub fn report_file(&self, file: &Path) {
+        let content = fs::read_to_string(file).unwrap();
+        let message = self.kind.get_message();
+        let escaped_line = content
+            .lines()
+            .nth(self.pos.row - 1)
+            .unwrap()
+            .escape_default();
+
+        let location = format!("{}:{}:{}", file.display(), self.pos.row, self.pos.col);
+        let err_report = formatdoc! {"
+           --> {location}
+            |
+            |   `{escaped_line}`
+            |
+        "};
+
+        error!("{message}\n{err_report}");
+    }
+}
+
 #[derive(Debug)]
 pub enum ErrorKind {
     InconsistentIndentation,
     UnexpectedIndentation,
 }
 
-fn report(file: &Path, pos: Position, message: &str) {
-    let content = fs::read_to_string(file).unwrap();
-    let line = content.lines().nth(pos.row - 1).unwrap();
+impl ErrorKind {
+    fn get_message(&self) -> String {
+        let msg = match self {
+            ErrorKind::InconsistentIndentation => indoc! {"
+                Inconsistent indentation
 
-    let location = format!("{}:{}:{}", file.display(), pos.row, pos.col);
-    let escaped_line = line.escape_default();
+                Smiley files should only use either space or tab as
+                indentation character, but never both
+            "},
+            ErrorKind::UnexpectedIndentation => indoc! {"
+                Unexpected indentation
+            "},
+        };
 
-    let err_report = formatdoc! {"
-        {location}
-        |
-        |   `{escaped_line}`
-        |
-    "};
-
-    error!("{message}\n{err_report}");
-}
-
-pub fn report_line_building_error(file: &Path, err: Error) {
-    let msg = match err.kind {
-        ErrorKind::InconsistentIndentation => indoc! {"
-            Inconsistent indentation
-
-            Smiley files should only use either space or tab as
-            indentation character, but never both
-        "},
-        ErrorKind::UnexpectedIndentation => indoc! {"
-            Unexpected indentation
-        "},
-    };
-
-    report(file, err.pos, msg);
+        String::from(msg)
+    }
 }

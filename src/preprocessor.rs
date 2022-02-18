@@ -1,4 +1,3 @@
-use crate::error;
 use itertools::Itertools;
 use line::{builder::Builder as LineBuilder, Line, NumberedLine};
 use log::{debug, info};
@@ -45,7 +44,7 @@ impl Preprocessor {
                     .build_line_from(raw_line)
                     .unwrap_or_else(|err| {
                         let src = self.src.as_deref().unwrap();
-                        error::report_line_building_error(src, err);
+                        err.report_file(src);
                         process::exit(1);
                     })
             })
