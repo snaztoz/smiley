@@ -1,5 +1,5 @@
 use crate::{preprocessor::Preprocessor, util};
-use log::{debug, info};
+use log::debug;
 use std::{cell::RefCell, path::Path};
 
 #[derive(Default)]
@@ -35,13 +35,6 @@ impl Builder {
 
         debug!("Setting out file to `{}`", file.display());
         self.preprocessor.borrow_mut().out = Some(file);
-
-        self
-    }
-
-    pub fn set_watch_mode(&self, watch_mode: bool) -> &Self {
-        info!("Setting preprocessor to `watch` mode");
-        self.preprocessor.borrow_mut().is_watch_mode = watch_mode;
 
         self
     }

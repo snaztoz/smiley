@@ -42,7 +42,6 @@ fn main() {
     let res = PreprocessorBuilder::default()
         .set_src_file(&cli.src)
         .set_out_file(cli.out.as_deref())
-        .set_watch_mode(cli.watch)
         .build()
         .run();
 

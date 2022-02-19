@@ -15,7 +15,6 @@ pub mod line;
 pub struct Preprocessor {
     src: Option<PathBuf>,
     out: Option<PathBuf>,
-    is_watch_mode: bool,
 }
 
 impl Preprocessor {
