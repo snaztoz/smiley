@@ -3,9 +3,9 @@ extern crate clap_verbosity_flag;
 use clap::StructOpt;
 use clap_verbosity_flag::Verbosity;
 use env_logger::Builder as LoggerBuilder;
-use log::LevelFilter;
+use log::{info, LevelFilter};
 use smiley::PreprocessorBuilder;
-use std::{path::PathBuf, process};
+use std::{path::PathBuf, process, time::Duration};
 
 /// A (yet-another) simple CSS preprocessor
 #[derive(Debug, StructOpt)]
@@ -46,8 +46,17 @@ fn main() {
         .build()
         .run();
 
-    if let Err(err) = res {
-        err.report_file(&cli.src);
-        process::exit(1);
+    match res {
+        Ok(duration) => log_compilation_success(duration),
+
+        Err(err) => {
+            err.report_file(&cli.src);
+            process::exit(1);
+        }
     }
+}
+
+fn log_compilation_success(duration: Duration) {
+    let duration = duration.as_secs_f32();
+    info!("Successfully compiled in {duration}s");
 }

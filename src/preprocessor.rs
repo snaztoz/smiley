@@ -2,7 +2,11 @@ use crate::error::Error;
 use itertools::Itertools;
 use line::{builder::Builder as LineBuilder, Line, NumberedLine};
 use log::{debug, info};
-use std::{fs, path::PathBuf};
+use std::{
+    fs,
+    path::PathBuf,
+    time::{Duration, Instant},
+};
 
 pub mod builder;
 pub mod line;
@@ -15,12 +19,13 @@ pub struct Preprocessor {
 }
 
 impl Preprocessor {
-    pub fn run(&mut self) -> Result<(), Error> {
+    pub fn run(&mut self) -> Result<Duration, Error> {
         assert!(self.src.is_some(), "src file is not setted properly");
         assert!(self.out.is_some(), "out file is not setted properly");
 
         info!("Running the preprocessor");
 
+        let start = Instant::now();
         let lines = self.read_src_file_lines()?;
 
         for (line, next) in lines.iter().tuple_windows() {
@@ -29,7 +34,7 @@ impl Preprocessor {
             let _kind = line::determine_kind(line, next);
         }
 
-        Ok(())
+        Ok(start.elapsed())
     }
 
     fn read_src_file_lines(&self) -> Result<Vec<NumberedLine>, Error> {
