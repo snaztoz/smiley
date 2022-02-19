@@ -1,9 +1,9 @@
 extern crate clap_verbosity_flag;
 
 use clap::StructOpt;
-use clap_verbosity_flag::Verbosity;
+use clap_verbosity_flag::{InfoLevel, Verbosity};
 use env_logger::Builder as LoggerBuilder;
-use log::{info, LevelFilter};
+use log::info;
 use smiley::PreprocessorBuilder;
 use std::{path::PathBuf, process, time::Duration};
 
@@ -23,7 +23,7 @@ struct Cli {
     out: Option<PathBuf>,
 
     #[structopt(flatten)]
-    verbose: Verbosity,
+    verbose: Verbosity<InfoLevel>,
 }
 
 fn main() {
@@ -32,11 +32,7 @@ fn main() {
     LoggerBuilder::new()
         .format_target(false)
         .format_timestamp(None)
-        .filter_level(
-            cli.verbose
-                .log_level()
-                .map_or(LevelFilter::Off, |level| level.to_level_filter()),
-        )
+        .filter_level(cli.verbose.log_level_filter())
         .init();
 
     let res = PreprocessorBuilder::default()
