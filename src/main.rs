@@ -5,7 +5,7 @@ use clap_verbosity_flag::Verbosity;
 use env_logger::Builder as LoggerBuilder;
 use log::LevelFilter;
 use smiley::PreprocessorBuilder;
-use std::path::PathBuf;
+use std::{path::PathBuf, process};
 
 /// A (yet-another) simple CSS preprocessor
 #[derive(Debug, StructOpt)]
@@ -39,10 +39,15 @@ fn main() {
         )
         .init();
 
-    PreprocessorBuilder::default()
+    let res = PreprocessorBuilder::default()
         .set_src_file(&cli.src)
         .set_out_file(cli.out.as_deref())
         .set_watch_mode(cli.watch)
         .build()
         .run();
+
+    if let Err(err) = res {
+        err.report_file(&cli.src);
+        process::exit(1);
+    }
 }
