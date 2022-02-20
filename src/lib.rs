@@ -4,7 +4,7 @@ extern crate pest_derive;
 
 pub use preprocessor::builder::Builder as PreprocessorBuilder;
 
-mod error;
+pub mod error;
 mod parser;
 mod preprocessor;
 mod util;
